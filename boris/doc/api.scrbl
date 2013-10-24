@@ -162,13 +162,13 @@ Control forms dynamically alter the sub-trees the spider will visit next, allowi
 
 @defform[(recur id)]{Returns the spider to the section of the web bound to @racket[id]. See @racket[lambda] for examples.}
 
-@section["IO"]
+@subsection["IO"]
 
 @defform[(show value web ...)]{Displays the value to the @racket[current-output-port]. Mainly useful for debugging or progress monitoring.}
                                                          
 @defform[(download path web ...)]{Writes the current (body) to the file specified by path. This can be useful for getting a closer look at a page with complex markup.}
 
-@section["Selectors"]
+@subsection["Selectors"]
 
 @defmodule[boris/selectors]
 

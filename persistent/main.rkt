@@ -22,7 +22,7 @@
  (proc-doc/names 
   make-fs-dict 
   (->* () (path-string? #:exists (or/c 'replace 'append)) fs-dict?)
-  (() ((fs-path (build-path (find-system-path 'temp-dir) "fs-dict")) (exists 'replace)))
+  (() ((fs-path (build-path (find-system-path 'temp-dir) "fs-dict")) (exists 'append)))
   @{Creates a @racket[fs-dict]. If @racket[exists] is @racket['append], then any index files found at @racket[fs-path] will be added to. Otherwise the index is eliminated.}))
 
 ; IMPLEMENTATION
