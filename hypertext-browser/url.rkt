@@ -47,7 +47,12 @@
      (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,path ,query ,fragment))]))
 
 (define (authority->userinfo&host&port authority)
-  (list  4 5 6))
+  (cdr (regexp-match (pregexp
+                      (string-append
+                       "(?:([^@]*)@)?"
+                       "([^:]*)"
+                       "(?::(\\d*))?")) 
+                     (or authority ""))))
 
 ; Notes:
 ; - url->string should be the exact inverse of string->url (do not encode query parameters)
@@ -78,7 +83,7 @@
 (module+ test
   (require rackunit)
   
-  (string->uri "http://usepass@foo.com:8080/bar?baz=fuzz#buzz")
+  (string->uri "usepass@foo.com:8080/bar?baz=fuzz#buzz")
   
   (check-equal? (url-path/string (string->url "http://foo.com")) "/")
   (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
