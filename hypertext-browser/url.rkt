@@ -33,12 +33,21 @@
           racket/string
           racket/dict)
 
-(serializable-struct uri (scheme authority path query fragment) #:transparent)
+(serializable-struct uri (scheme userinfo host port path query fragment) #:transparent)
 
 (define (string->uri s)
-  (match (cdr (regexp-match #px"^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?" s))
+  (match (cdr (regexp-match (pregexp
+                             (string-append 
+                              "^(?:([^:/?#]+):)?" ; scheme  
+                              "(?://([^/?#]*))?" ; authority
+                              "([^?#]*)" ; path
+                              "(?:\\?([^#]*))?" ; query
+                              "(?:#(.*))?")) s)) ; fragment
     [(list scheme authority path query fragment)
-     (uri scheme authority path query fragment)]))
+     (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,path ,query ,fragment))]))
+
+(define (authority->userinfo&host&port authority)
+  (list  4 5 6))
 
 ; Notes:
 ; - url->string should be the exact inverse of string->url (do not encode query parameters)
@@ -69,7 +78,7 @@
 (module+ test
   (require rackunit)
   
-  (string->uri "http://www.foo.com:8080/bar?baz=fuzz#buzz")
+  (string->uri "http://usepass@foo.com:8080/bar?baz=fuzz#buzz")
   
   (check-equal? (url-path/string (string->url "http://foo.com")) "/")
   (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
