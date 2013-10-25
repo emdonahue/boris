@@ -10,7 +10,9 @@
   [string- (-> string? string? string?)]
   [->symbol (-> (or/c string? symbol?) symbol?)]
   [->list (-> any/c list?)]
-  [car/or (-> list? any/c any/c)]))
+  [car/or (-> list? any/c any/c)]
+  [value->file (-> path-string? any/c any/c)])
+ debug-mode)
 
 ; DEBUGGING
 
@@ -18,6 +20,12 @@
 
 (define (dbg a b)
   (when (and a (debug-mode)) (display (format "~a: ~a\n" a b))) b)
+
+; FILE IO
+
+(define (value->file value file)
+  (with-output-to-file file 
+    (lambda () (write value))))
 
 ; COERCION
 

@@ -41,11 +41,24 @@
 
 
 
-(provide (proc-doc/names xpath/text (->* (string?) ((or/c string? (listof string?))) (listof string)) ((query) ((html (browser-body (current-document))))) @{Appends "/text()" to @racket[query], applies it to @racket[html] and returns a list of matches. Unlike @racket[xpath], @racket[xpath/text] will preserve empty nodes as "" rather than skipping them. By default, html is the text of the current page.}))
+(provide (proc-doc/names xpath/text 
+                         (->* (string?) ((or/c string? (listof string?))) (listof string?)) ((query) ((html (browser-body (current-document))))) @{Appends "/text()" to @racket[query], applies it to @racket[html] and returns a list of matches. Unlike @racket[xpath], @racket[xpath/text] will preserve empty nodes as "" rather than skipping them. By default, html is the text of the current page.}))
+
 (define (xpath/text query [html (browser-body (current-document))])
   (html:xpath/text html query))
 
-(provide (proc-doc/names forms (->* () (dict? (or/c string? (listof string?))) (listof html:form/c)) (() ((data '()) (html (browser-body (current-document))))) @{Scans @racket[html] for any html forms and returns a list of @racket[form/c]s ready to supply to the submit form. Each form's fields will be filled out with any name/value pairs supplied in @racket[data]. If @racket[html] is provided, html will be used instead of the default of the current page text. If @racket[html] is a list, forms will run on each element of the list and all forms found in any element will be returned in a flattened list. This makes @racket[forms] suitable for use with @racket[xpath] to submit only specific forms.}))
+
+
+(provide (proc-doc/names xpath/first
+                         (->* (string?) (any/c (or/c string? (listof string?))) string?) ((query) ((default #f) (html (browser-body (current-document))))) @{Returns the first result of @racket[xpath] or @racket[default] if @racket[xpath] finds no matches.}))
+
+(define (xpath/first query [default #f] [html (browser-body (current-document))])
+  (html:xpath/first html query default))
+
+
+
+(provide (proc-doc/names forms 
+                         (->* () (dict? (or/c string? (listof string?))) (listof html:form/c)) (() ((data '()) (html (browser-body (current-document))))) @{Scans @racket[html] for any html forms and returns a list of @racket[form/c]s ready to supply to the submit form. Each form's fields will be filled out with any name/value pairs supplied in @racket[data]. If @racket[html] is provided, html will be used instead of the default of the current page text. If @racket[html] is a list, forms will run on each element of the list and all forms found in any element will be returned in a flattened list. This makes @racket[forms] suitable for use with @racket[xpath] to submit only specific forms.}))
 (define (forms [data '()] [html (browser-body (current-document))])
   (html:forms html data))
 
