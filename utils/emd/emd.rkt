@@ -23,7 +23,7 @@
 
 ; FILE IO
 
-(define (value->file value file)
+(define (value->file file value)
   (with-output-to-file file 
     (lambda () (write value))
   #:exists 'replace))
