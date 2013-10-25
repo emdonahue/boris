@@ -54,9 +54,9 @@
                                    (recur hn-page)))))))
 
 
+(display "Enter a search term (regexp) to find Hacker News articles mentioning the term:\n")
 
-
-(for ([fly (in-producer (spider/generator (search-hn #rx"patent") #:cache (make-fs-dict "/tmp/hn")) (void))]) (display fly) (newline))
+(for ([fly (in-producer (spider/generator (search-hn (regexp (read-line)))) (void))]) (display fly) (newline))
   
 
 
