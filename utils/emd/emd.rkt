@@ -25,7 +25,8 @@
 
 (define (value->file value file)
   (with-output-to-file file 
-    (lambda () (write value))))
+    (lambda () (write value))
+  #:exists 'replace))
 
 ; COERCION
 
