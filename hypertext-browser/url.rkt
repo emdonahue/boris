@@ -27,9 +27,19 @@
 ; IMPLEMENTATION
 
  (require (except-in net/url url->string)
+          racket/serialize
+          racket/match
           racket/list
           racket/string
           racket/dict)
+
+(serializable-struct uri (scheme authority path query fragment) #:transparent)
+
+(define (string->uri s)
+  (match (cdr (regexp-match #px"^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?" s))
+    [(list scheme authority path query fragment)
+     (uri scheme authority path query fragment)]))
+
 ; Notes:
 ; - url->string should be the exact inverse of string->url (do not encode query parameters)
 ; - string->url should trim whitespace
@@ -58,6 +68,9 @@
 
 (module+ test
   (require rackunit)
+  
+  (string->uri "http://www.foo.com:8080/bar?baz=fuzz#buzz")
+  
   (check-equal? (url-path/string (string->url "http://foo.com")) "/")
   (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
   (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?")) "/bar?baz=f i?")
