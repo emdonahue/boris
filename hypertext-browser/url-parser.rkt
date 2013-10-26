@@ -9,23 +9,36 @@
   (reserved (:or gen-delims sub-delims))
   (gen-delims (char-set ":/?#[]@"))
   (sub-delims (char-set "!$&'()*+,;="))
-  (scheme (:: alphabetic (:* alphabetic numeric (char-set "+-.")))))
+  (scheme (:: alphabetic (:* alphabetic numeric (char-set "+-."))))
+  (hexdig (:or numeric (:/ "afAF"))))
   
-
-(define-empty-tokens delimiters (SCHEME COLON EOF))
+(define-tokens alphanum (ALPHA DIGIT))
+(define-empty-tokens delimiters (COLON SLASH PLUS DASH DOT EOF))
 
 (define lex-uri
-  (lexer
-   [(eof) (token-EOF)]
+  (lexer   
+   [alphabetic (token-ALPHA lexeme)]
+   [numeric (token-DIGIT lexeme)]
    [":" (token-COLON)]
-   [scheme (token-SCHEME)]
+   ["/" (token-SLASH)]
+   ["+" (token-PLUS)]
+   ["-" (token-DASH)]
+   ["." (token-DOT)]
+   [(eof) (token-EOF)]
    ))
 
 (define parse-uri
   (parser
-   (tokens delimiters)
-          (start delim)
-          (grammar (delim [(COLON) "WHATEVS"]))
+   (tokens alphanum delimiters)
+          (start uri)
+          (grammar (uri [(scheme COLON) `((scheme . ,$1))])
+                   (scheme [(scheme-char scheme) (string-append $1 $2)]
+                               [(scheme-char) $1])
+                   (scheme-char [(ALPHA) $1]
+                                [(DIGIT) $1]
+                                [(PLUS) "+"]
+                                [(DASH) "-"]
+                                [(DOT) "."]))
           (end EOF)
           (error (lambda args (display args)))))
 
@@ -44,7 +57,7 @@
 ;(parse-uri token-COLON)
 
 (define (string->tokens s)
-  (define ip (open-input-string "http:"))
+  (define ip (open-input-string s))
   (port-count-lines! ip)
   (pop-token ip))
 
@@ -56,6 +69,7 @@
 
 
 
-(string->tokens "http:")
+;(string->tokens "http://")
+(string->uri "http:")
 
 ;(string->uri ":")
