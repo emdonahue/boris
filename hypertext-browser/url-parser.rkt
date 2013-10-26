@@ -8,15 +8,18 @@
   (unreserved (:or alphabetic numeric (char-set "-._~")))
   (reserved (:or gen-delims sub-delims))
   (gen-delims (char-set ":/?#[]@"))
-  (sub-delims (char-set "!$&'()*+,;=")))
+  (sub-delims (char-set "!$&'()*+,;="))
+  (scheme (:: alphabetic (:* alphabetic numeric (char-set "+-.")))))
   
 
-(define-empty-tokens delimiters (COLON EOF))
+(define-empty-tokens delimiters (SCHEME COLON EOF))
 
 (define lex-uri
   (lexer
    [(eof) (token-EOF)]
-   [":" (token-COLON)]))
+   [":" (token-COLON)]
+   [scheme (token-SCHEME)]
+   ))
 
 (define parse-uri
   (parser
@@ -40,4 +43,19 @@
 
 ;(parse-uri token-COLON)
 
-(string->uri ":")
+(define (string->tokens s)
+  (define ip (open-input-string "http:"))
+  (port-count-lines! ip)
+  (pop-token ip))
+
+(define (pop-token ip)
+  (let ([token (lex-uri ip)])
+    (if (equal? token (token-EOF))
+        (list token)
+        (cons token (pop-token ip)))))
+
+
+
+(string->tokens "http:")
+
+;(string->uri ":")
