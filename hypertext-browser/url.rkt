@@ -5,6 +5,13 @@
          (for-doc racket/base
                   scribble/manual))
 
+(provide 
+ (proc-doc/names
+  string->uri 
+  (-> string? uri?)
+  (uri-string)
+  @{Parses @racket[uri-string] into a @racket[uri].}))
+
 ;(provide 
 ; (proc-doc/names
 ;  url->string/raw 

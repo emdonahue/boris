@@ -31,7 +31,7 @@
               @{Represents an external document containing @racket[body] fetched at @racket[timestamp] from @racket[url] that returned with @racket[status] and @racket[head].})
  
  (struct*-doc request
-              ([url url?])
+              ([url uri?])
               @{Contains all information necessary to obtain the external document specified by @racket[url]. Meant to be subclassed by protocol-specific libraries.})
  
  ; Accessors
@@ -41,7 +41,7 @@
                  @{Returns the most recent request sent by the browser (corresponding to the browser's current page.})
  
  (proc-doc/names browser-url
-                 (-> hypertext-browser? url?)
+                 (-> hypertext-browser? uri?)
                  (browser)
                  @{Returns the url of the current page.})
  
@@ -140,6 +140,6 @@
   (check-equal? (browser-state browser3) 6)
   
   (define browser2 (make-hypertext-browser))
-  (check-equal? (url->string (browser-url browser2)) ""))
+  (check-equal? (uri->string (browser-url browser2)) ""))
 
 
