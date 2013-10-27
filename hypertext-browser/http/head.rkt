@@ -30,7 +30,7 @@
  ; Header-Specific accessors/Mutators
  (proc-doc/names 
   headers-Set-Cookies 
-  (->* (headers/c url?) ((listof cookie?)) (listof cookie?))
+  (->* (headers/c uri?) ((listof cookie?)) (listof cookie?))
   ((headers request-url) ((stale-cookies '())))
   @{Returns all cookies contained in Set-Cookie fields in @racket[headers] with Domain and Path defaults filled in from @racket[request-url]. If @racket[stale-cookies] are provided, the returned cookies will include the stale cookies that have not been overwritten by more freshly baked cookies.})
   
@@ -42,7 +42,7 @@
   
   (proc-doc/names
    headers-Location
-   (-> headers/c (or/c url? #f))
+   (-> headers/c (or/c uri? #f))
    (headers)
    @{Extracts the Location field from @racket[headers] or returns @racket[#f] if no Location is set.}))
 
@@ -51,7 +51,7 @@
 ; IMPLEMENTATIONs
 
 (require net/head
-         net/url
+         "../uri.rkt"
          "cookies.rkt"
          "../../utils/emd/emd.rkt")
 
@@ -100,7 +100,7 @@
 ; Location         
 (define (headers-Location headers)
   (let ([location (dict-ref headers 'Location #f)])
-    (if location (string->url location) #f)))
+    (if location (string->uri location) #f)))
 
 ; TESTS
 
@@ -111,12 +111,12 @@
   (define head '(#"Set-Cookie: foo=fee; path=/bar ; domain = baz.com" #"Location: http://bar.com" #"Set-Cookie: baz=bax"))
   (check-equal? (headers->alist head) '((Set-Cookie . "foo=fee; path=/bar ; domain = baz.com") (Location . "http://bar.com") (Set-Cookie . "baz=bax")))
   (check-equal? (alist->headers (headers->alist head)) head)
-  (check-equal? (url->string (headers-Location (headers->alist head))) (url->string (string->url "http://bar.com")))
+  (check-equal? (uri->string (headers-Location (headers->alist head))) (uri->string (string->uri "http://bar.com")))
   
   (let ([headers (headers->alist head)])
     (check-equal? (headers-set headers 'Set-Cookie "fu=chu") '((Set-Cookie . "fu=chu") (Location . "http://bar.com"))))
   
   ; Cookies
-  (check-equal? (headers-Set-Cookies (headers->alist head) (string->url "http://fiz.com") (list (cookie "foo" "fyy" "baz.com" "/bar"))) 
+  (check-equal? (headers-Set-Cookies (headers->alist head) (string->uri "http://fiz.com") (list (cookie "foo" "fyy" "baz.com" "/bar"))) 
            (list (cookie "foo" "fee" "baz.com" "/bar") 
                  (cookie "baz" "bax" "fiz.com" "/"))))

@@ -103,8 +103,8 @@
 (define (cookies-set jar cookie)
   (sort (remove-duplicates (cons cookie jar) cookie=?) 
         (lambda (longer shorter)
-          (> (string-length longer)
-             (string-length shorter)))
+          (> (string-length (or longer "/"))
+             (string-length (or shorter "/"))))
         #:key cookie-path))
 
 (define (cookies-set* jar cookies)
