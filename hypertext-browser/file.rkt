@@ -15,7 +15,7 @@
   @{Contains all information necessary to retrieve a document from the filesystem.})
  (proc-doc/names
   file/request 
-  (-> hypertext-browser? string? file-request?)
+  (-> hypertext-browser? uri? file-request?)
   (browser file-url)
   @{Creates a request that reads a file specified by @racket[file-url]. Must be in file:// form.}))
 

@@ -28,18 +28,18 @@
          racket/match)
 
 (define (hypertext/get browser u)
-  (match (url-scheme (string->url u))
+  (match (uri-scheme u)
     ["http" (http/request browser u)]
     ["https" (http/request browser u)]
     ["file" (file/request browser u)]
-    [#f (hypertext/get browser (url->string/raw (combine-url/relative (browser-url browser) u)))])) ;TODO more thoroughly test relative url handling
+    [#f (hypertext/get browser (combine-uri (browser-url browser) u))])) ;TODO more thoroughly test relative url handling
 
 ; TESTS
 
 (module+ test
   (require rackunit)
   (define browser (make-hypertext-browser))
-  (define http-req (hypertext/get browser "http://foo.com"))
+  (define http-req (hypertext/get browser (string->uri "http://foo.com")))
   (check-pred http-request? http-req)
   (check-equal? (http-request-method http-req) 'GET))
     

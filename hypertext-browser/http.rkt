@@ -21,25 +21,25 @@
  
  ; Request Constructors
  (proc-doc/names http/request
-                 (->* (hypertext-browser? string?)
+                 (->* (hypertext-browser? uri?)
                       (#:method symbol?)
                       http-request?)
                  ((browser url) ((method 'GET)))
                  @{Creates a request function from the current state of @racket[browser].})
  
  (proc-doc/names http/redirect
-                 (-> hypertext-browser? string? http-request?)
+                 (-> hypertext-browser? uri? http-request?)
                  (browser url)
                  @{Creates a request function from the current state of @racket[browser].})
  
  (proc-doc/names http/click
-                 (-> hypertext-browser? string? http-request?)
+                 (-> hypertext-browser? uri? http-request?)
                  (browser url)
                  @{Creates a request function from the current state of @racket[browser].})
  
  (proc-doc/names http/submit
-                 (->* (hypertext-browser? string?)
-                      (dict?)
+                 (->* (hypertext-browser? uri?)
+                      (dict?) 
                       http-request?)
                  ((browser url) ((data '())))
                  @{Creates a form submit function from the current state of @racket[browser].}))
