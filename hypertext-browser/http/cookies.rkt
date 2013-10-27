@@ -130,7 +130,7 @@
   (and c
        (struct-copy cookie c
                [domain (string-trim (string-downcase (or (cookie-domain c) (uri-host url))) ".")]
-               [path (or (cookie-path c) (uri-path url))])))
+               [path (or (cookie-path c) (or (uri-path url) "/"))])))
 
 ; RFC 6265 5.2 algorithm for parsing Set-Cookie header fields.
 (define (parse/set-cookie set-cookie-string)
