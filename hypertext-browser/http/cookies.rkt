@@ -18,7 +18,7 @@
  
  (proc-doc/names
   cookies-ref 
-  (-> (listof cookie?) (or/c url? string?) (listof cookie?))
+  (-> (listof cookie?) (or/c uri? string?) (listof cookie?))
   (cookies name-or-request-url)
   @{If @racket[name-or-request-url] is a string, it is interpreted as a name and the cookies returned are those from @racket[cookies] matching that name. If @racket[name-or-request-url] is a url, the returned cookies will be those matching the @racket[url-host] and @racket[url-path] of @racket[name-or-request-url].})
  
@@ -30,7 +30,7 @@
   
   (proc-doc/names 
    Set-Cookie->cookie 
-   (-> string? url? cookie?)
+   (-> string? uri? cookie?)
    (Set-Cookie-header request-url)
    @{Parses @racket[Set-Cookie-header], filling in default Domain and Path values with @racket[request-url].})
   
@@ -49,8 +49,7 @@
          racket/string
          racket/dict
          racket/list
-         net/url
-         "../url.rkt"
+         "../uri.rkt"
          "../../utils/emd/emd.rkt")
 
 ; Datatypes
@@ -71,14 +70,14 @@
 (define/match (cookies-ref cookies name||url)
   [(cookies (and name (? string?)))
    (filter (lambda (cookie) (string=? name (cookie-name cookie))) cookies)]
-  [(cookies (and u (? url?)))
+  [(cookies (and u (? uri?)))
    (filter (lambda (cookie) 
              (and 
               (domain-match 
-               (url-host u) 
+               (uri-host u) 
                (cookie-domain cookie))
               (path-match 
-               (url-path/string u)
+               (or (uri-path u) "/")
                (cookie-path cookie)))) cookies)])
 
 ; Check if a cookie domain-matches a host.
@@ -130,8 +129,8 @@
 (define (cookie:fill c url)
   (and c
        (struct-copy cookie c
-               [domain (string-trim (string-downcase (or (cookie-domain c) (url-host url))) ".")]
-               [path (or (cookie-path c) (url-path/string url))])))
+               [domain (string-trim (string-downcase (or (cookie-domain c) (uri-host url))) ".")]
+               [path (or (cookie-path c) (uri-path url))])))
 
 ; RFC 6265 5.2 algorithm for parsing Set-Cookie header fields.
 (define (parse/set-cookie set-cookie-string)
@@ -189,9 +188,9 @@
   (check-false (path-match "/" "/foo/bar"))
   
   (check-equal? (cookies-ref (list c1 c2 c3) "baz") (list c2 c3))
-  (check-equal? (cookies-ref (list c1 c2 c3) (string->url "http://fii.foo.com")) (list c1))
-  (check-equal? (cookies-ref (list c1 c2 c3) (string->url "http://fyy.foo.com/foo/bar/")) (list c1))
-   (check-equal? (cookies-ref (list c1 c2 c3) (string->url "http://fii.foo.com/foo/bar/")) (list c1 c2 c3))
+  (check-equal? (cookies-ref (list c1 c2 c3) (string->uri "http://fii.foo.com")) (list c1))
+  (check-equal? (cookies-ref (list c1 c2 c3) (string->uri "http://fyy.foo.com/foo/bar/")) (list c1))
+   (check-equal? (cookies-ref (list c1 c2 c3) (string->uri "http://fii.foo.com/foo/bar/")) (list c1 c2 c3))
 
                               
    ; Mutators
@@ -215,7 +214,7 @@
         [domain '("" ";" "; domain = Foo.com ")])
     ; verify that the parser handles them correctly.
     (let* ([cookie-str (string-append name value path domain)]
-           [cookie (Set-Cookie->cookie cookie-str (string->url "http://fuzz.com/buzz"))])  
+           [cookie (Set-Cookie->cookie cookie-str (string->uri "http://fuzz.com/buzz"))])  
       ; If the parser returned #f,
       (unless cookie
         ; the cookie must either 
@@ -235,4 +234,4 @@
         (check-equal? (cookie-path cookie) (if (< 2 (string-length path)) "/" "/buzz") cookie-str)
         ; domain.
         (check-equal? (cookie-domain cookie) (if (< 2 (string-length domain)) "foo.com" "fuzz.com")) cookie-str)))
-  (check-equal? (cookie-domain (Set-Cookie->cookie "name=value; domain=bar; domain=foo;" (string->url ""))) "foo"))
+  (check-equal? (cookie-domain (Set-Cookie->cookie "name=value; domain=bar; domain=foo;" (string->uri ""))) "foo"))
