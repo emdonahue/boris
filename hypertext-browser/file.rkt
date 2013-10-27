@@ -36,7 +36,7 @@
                        (request->browser self browser)))
 
 (define (file/request browser file-url)
-  (file-request (string->uri file-url)))
+  (file-request file-url))
 
 ; Fetch a file and package the results up as a browser.
 (define (request->browser req browser)
@@ -54,6 +54,6 @@
   
   (define-runtime-path file.rkt "file.rkt")
   (define browser (make-hypertext-browser))
-  (define file-request (file/request browser (uri->string (path->uri file.rkt))))
+  (define file-request (file/request browser (path->uri file.rkt)))
   (define file-browser (file-request browser))
   (check-equal? (browser-body file-browser) (file->string file.rkt)))

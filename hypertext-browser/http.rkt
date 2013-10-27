@@ -13,7 +13,7 @@
  
  (struct*-doc 
   http-request
-  ([url url?]
+  ([url uri?]
    [method symbol?]
    [header (listof (cons/c symbol? string?))]
    [data (listof (cons/c string? string?))])
@@ -75,8 +75,8 @@
 
 ; Request Constructors
 
-(define (http/request browser url/string #:method [method 'GET] #:headers [headers '()] #:data [data #f])
-  (let ([url (resolve-url browser url/string)])
+(define (http/request browser url/relative #:method [method 'GET] #:headers [headers '()] #:data [data #f])
+  (let ([url (combine-uri (browser-url browser) url/relative)])
     (dbg #f (uri->string url))
     (dbg #f (browser-state browser))
     (http-request url
@@ -117,17 +117,17 @@
     (dbg #f state)
     (match (dict-ref (response-head response) 'Location #f)
       [#f browser]
-      [redirect ((http/redirect browser redirect) browser)] ; If we get a Location, run the redirect.
+      [redirect ((http/redirect browser (string->uri redirect)) browser)] ; If we get a Location, run the redirect.
       )))
 
 (define (request->response request)
-  (parameterize ([debug-mode #t])
+  (parameterize ([debug-mode #f])
   (let ([u (request-url request)])
     (dbg "url" (uri->string u))
     (let-values ([(status header port)
                   (http-sendrecv 
                    (dbg #f (uri-host u))
-                   (dbg "uri" (uri-relative-ref u))
+                   (dbg "uri" (or (uri-relative-ref u) "/"))
                    #:ssl? (string=? (uri-scheme u) "https")
                    #:port (dbg #f (or (uri-port u) (if (string-ci=? (uri-scheme u) "https") 443 80)))
                    #:method (dbg #f (http-request-method request))
@@ -138,7 +138,7 @@
 ; Utilities
 
 (define (resolve-url browser url)
-  (combine-url/relative (browser-url browser) url))
+  (combine-uri (browser-url browser) url))
 
 ; TESTS
 
@@ -152,13 +152,13 @@
   (define server (start-echo-server/detached 60415))
   
   (define browser0 (make-hypertext-browser))
-  (define browser1 ((http/request browser0 "http://localhost:60415") browser0))           
-  (define browser2 ((http/request browser1 "http://localhost:60415/head") browser1))
-  (define browser3 ((http/submit browser2 "http://localhost:60415/head") browser2))
+  (define browser1 ((http/request browser0 (string->uri "http://localhost:60415")) browser0))
+  (define browser2 ((http/request browser1 (string->uri "http://localhost:60415/head")) browser1))
+  (define browser3 ((http/submit browser2 (string->uri "http://localhost:60415/head")) browser2))
   
   (check-equal? (dict-ref (echo->body browser1) 'uri) "/")
       
-  (check-equal? (url->string (browser-url browser2)) "http://localhost:60415/redirected")
+  (check-equal? (uri->string (browser-url browser2)) "http://localhost:60415/redirected")
 
   (check-equal? (dict-ref (dict-ref (echo->body browser3) 'headers) #"Cookie") #"send2all=v1")
   (check-equal? (length (browser-state browser3)) 2)

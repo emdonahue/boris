@@ -68,7 +68,7 @@
       (lambda () 
         (write 
          `((method . ,(request-method req)) 
-           (uri . ,(url->path&query&fragment (request-uri req))) 
+           (uri . ,(url->string (request-uri req))) 
            (headers . ,(req->headers req))
            (data . ,(request-post-data/raw req))))))))
 
