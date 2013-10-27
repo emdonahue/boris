@@ -50,6 +50,7 @@
 
 (define (string-last str)
   (string-ref str (- (string-length str) 1)))
+              
 
 ; PREFIX
 
@@ -83,10 +84,21 @@
 
 
 
+; FILE
+
+(define (combine-path base rel)
+  (if (absolute-path? rel) rel
+      (let-values ([(dir name dir?) (split-path base)])
+        (if dir? (build-path base rel)
+            (build-path dir rel)))))
 
 
 (module+ test
   (require rackunit)
+  
+  (check-equal? (combine-path "/foo/bar/" "/baz") "/baz")
+  (check-equal? (combine-path "/foo/bar/" "baz") (string->path "/foo/bar/baz"))
+  (check-equal? (combine-path "/foo/bar" "baz") (string->path "/foo/baz"))
   
   (check-equal? (->symbol "foo") 'foo)
   

@@ -23,10 +23,9 @@
 (require "base.rkt"
          "http.rkt"
          "file.rkt"
-         "url.rkt"
+         "uri.rkt"
          "../utils/emd/emd.rkt"
-         racket/match
-         net/url)
+         racket/match)
 
 (define (hypertext/get browser u)
   (match (url-scheme (string->url u))

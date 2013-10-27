@@ -46,14 +46,13 @@
 
 (require racket/serialize
          racket/date
-         net/url
          net/uri-codec
          net/http-client
          racket/dict
          racket/match
          racket/port
          "base.rkt"
-         "url.rkt"
+         "uri.rkt"
          "http/head.rkt"
          "http/cookies.rkt"
          "../utils/emd/emd.rkt")
@@ -78,7 +77,7 @@
 
 (define (http/request browser url/string #:method [method 'GET] #:headers [headers '()] #:data [data #f])
   (let ([url (resolve-url browser url/string)])
-    (dbg #f (url->string/raw url))
+    (dbg #f (uri->string url))
     (dbg #f (browser-state browser))
     (http-request url
                   method 
@@ -92,17 +91,17 @@
 (define (http/click browser url)
   (http/request browser url 
                 #:method 'GET
-                #:headers (headers-set (http-request-header (browser-request browser)) 'Referer (url->string/raw (browser-url browser)))))
+                #:headers (headers-set (http-request-header (browser-request browser)) 'Referer (uri->string (browser-url browser)))))
 
 (define (http/redirect browser url)
   (http/request browser url 
                 #:method 'GET ;(http-request-method (browser-request browser))
-                #:headers `((Referer . ,(url->string/raw (browser-url browser)))))) ; (headers-set (http-request-header (browser-request browser)) 'Referer (url->string/raw (browser-url browser)))
+                #:headers `((Referer . ,(uri->string (browser-url browser)))))) ; (headers-set (http-request-header (browser-request browser)) 'Referer (url->string/raw (browser-url browser)))
                 ;#:data (http-request-data (browser-request browser))))
 
 (define (http/submit browser url [data #f])
   (dbg #f (http/request browser url #:method 'POST 
-                                   #:headers `((Referer . ,(url->string/raw (browser-url browser)))
+                                   #:headers `((Referer . ,(uri->string (browser-url browser)))
                                               (Content-Type . "application/x-www-form-urlencoded")) 
                                    #:data data)))
   
@@ -124,13 +123,13 @@
 (define (request->response request)
   (parameterize ([debug-mode #t])
   (let ([u (request-url request)])
-    (dbg "url" (url->string/raw u))
+    (dbg "url" (uri->string u))
     (let-values ([(status header port)
                   (http-sendrecv 
-                   (dbg #f (url-host u))
-                   (dbg "uri" (url->path&query&fragment u))
-                   #:ssl? (string=? (url-scheme u) "https")
-                   #:port (dbg #f (or (url-port u) (if (string=? (url-scheme u) "https") 443 80)))
+                   (dbg #f (uri-host u))
+                   (dbg "uri" (uri-relative-ref u))
+                   #:ssl? (string=? (uri-scheme u) "https")
+                   #:port (dbg #f (or (uri-port u) (if (string-ci=? (uri-scheme u) "https") 443 80)))
                    #:method (dbg #f (http-request-method request))
                    #:headers (dbg "HEADER" (alist->headers (http-request-header request)))                   
                    #:data (dbg #f (http-request-data/encoded request)))])
