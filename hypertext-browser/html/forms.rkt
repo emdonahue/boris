@@ -88,7 +88,7 @@
 
 (module+ test
   (require rackunit)
-(define form "<form action=/foo/bar method=put><input id=foo name=baz value='bar'></input><input name=foo value=biz></input></form>")
+(define form "<FORM action=/foo/bar method=put><input id=foo name=baz value='bar'></input><input name=foo value=biz></input></FORM>")
   
 (check-match (form:fill form '(("foo" . "bez"))) 
              '("/foo/bar" PUT ((foo . "bez") (baz . "bar"))))

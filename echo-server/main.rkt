@@ -29,6 +29,9 @@
          web-server/http/request-structs
          racket/contract/base
          racket/port
+         racket/list
+         racket/dict
+         racket/string
          "../hypertext-browser/url.rkt")
 
 (define-values (echo-server-dispatch echo-server-url)
@@ -68,7 +71,7 @@
       (lambda () 
         (write 
          `((method . ,(request-method req)) 
-           (uri . ,(url->string (request-uri req))) 
+           (uri . ,(url->string/raw (request-uri req))) 
            (headers . ,(req->headers req))
            (data . ,(request-post-data/raw req))))))))
 
@@ -104,3 +107,22 @@
        (header-value header))))
 
 
+(define (url->string/raw u)
+  (string-append (or (url-scheme u) "") "://" (or (url-host u) "") (url->path&query&fragment u)))                
+
+; Returns everything following the host as a raw string. 
+(define (url->path&query&fragment u) 
+  (string-append
+   (url-path/string u) ; path
+   (if (empty? (url-query u)) "" (string-append* "?" (url-query/string u))) ; query
+   (if (url-fragment u) (string-append "#" (url-fragment u)) ""))) ; fragment
+
+(define (url-path/string u)
+  (string-append
+   "/" (string-join
+        (map path/param-path (url-path u)) "/")))
+
+(define (url-query/string u)
+  (dict-map (url-query u) 
+            (lambda (k v) 
+              (string-append (symbol->string k) "=" (or v "")))))
