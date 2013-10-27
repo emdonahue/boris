@@ -7,7 +7,7 @@
 (require scribble/srcdoc
          racket/contract/base
          racket/dict
-         net/url
+         "uri.rkt"
          (for-doc scribble/manual
                   racket/base))
 
@@ -84,7 +84,7 @@
 (serializable-struct request (url) #:transparent)
 
 (define (make-hypertext-browser)
-  (hypertext-browser `((,(request (string->url "")) ,(response "" '() "" (current-date)) ()))))
+  (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ()))))
 
 ; Mutators
 

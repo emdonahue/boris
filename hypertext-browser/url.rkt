@@ -67,7 +67,7 @@
                               "(?:\\?([^#]*))?" ; query
                               "(?:#(\\S*))?\\s*$")) s)) ; fragment
     [(list scheme authority path query fragment)
-     (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,path ,query ,fragment))]))
+     (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,(if (string=? "" path) #f path) ,query ,fragment))]))
 
 (define (authority->userinfo&host&port authority)
   (match (cdr (regexp-match (pregexp
@@ -116,6 +116,8 @@
   (check-match (string->uri u) (uri "http" "user:pass" "foo.com" 8080 "/bar" "baz=fuzz" "buzz"))
   
   (check-equal? (string-trim u) (uri->string (string->uri u)))
+  
+  (check-equal? (string->uri "") (uri #f #f #f #f #f #f #f))
   
 ;  (check-equal? (url-path/string (string->url "http://foo.com")) "/")
 ;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
