@@ -40,6 +40,24 @@
 
 ; PARSING =================================
 
+(define (uri->string u)
+  (match u
+    [(uri scheme userinfo host port path query fragment)
+     (string-append 
+      (if scheme (string-append scheme ":") "")
+      (authority->string userinfo host port)
+      (or path "")
+      (if query (string-append "?" query) "")
+      (if fragment (string-append "#" fragment) ""))]))
+
+(define (authority->string userinfo host port)
+  (if (not host) ""
+      (string-append
+       "//"
+       (if userinfo (string-append userinfo "@") "")
+       host
+       (if port (string-append ":" (number->string port)) ""))))
+
 (define (string->uri s)
   (match (cdr (regexp-match (pregexp
                              (string-append 
@@ -93,9 +111,11 @@
 (module+ test
   (require rackunit)
   
-  (define u (string->uri " http://user:pass@foo.com:8080/bar?baz=fuzz#buzz "))
+  (define u " http://user:pass@foo.com:8080/bar?baz=fuzz#buzz ")
   
-  (check-match u (uri "http" "user:pass" "foo.com" 8080 "/bar" "baz=fuzz" "buzz"))
+  (check-match (string->uri u) (uri "http" "user:pass" "foo.com" 8080 "/bar" "baz=fuzz" "buzz"))
+  
+  (check-equal? (string-trim u) (uri->string (string->uri u)))
   
 ;  (check-equal? (url-path/string (string->url "http://foo.com")) "/")
 ;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
