@@ -2,6 +2,7 @@
 
 (require scribble/srcdoc
          racket/contract/base
+         "uri.rkt"
          (for-doc
           racket/base
           scribble/manual))
@@ -24,7 +25,6 @@
 (require racket/file
          racket/serialize
          racket/date
-         "uri.rkt"
          "base.rkt")
 
 ; Datatypes

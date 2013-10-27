@@ -64,11 +64,11 @@
   (require rackunit
            racket/runtime-path
            racket/file
-           (prefix-in net/ net/url)
+           "../hypertext-browser/uri.rkt"
            "syntax.rkt")
   
   (define-runtime-path interpreter.rkt "interpreter.rkt")
-  (define interpreter-url (net/url->string (net/path->url interpreter.rkt)))
+  (define interpreter-url (uri->string (path->uri interpreter.rkt)))
   
   (define web (let/web ([a '(3 4)])
                     (go interpreter-url

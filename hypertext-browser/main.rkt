@@ -14,7 +14,7 @@
  (except-out (all-from-out "file.rkt") file-request)
  (proc-doc/names
   hypertext/get 
-  (-> hypertext-browser? string? request?)
+  (-> hypertext-browser? uri? request?)
   (browser url)
   @{Returns as basic a fetch request as possible in the protocol specified in @racket[url]. For http://, this would be a GET request; for file://, it would be a simple read.}))
 

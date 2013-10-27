@@ -95,15 +95,15 @@
 
 (module+ test
   (require rackunit
-           racket/runtime-path
-           net/url
+           racket/runtime-path           
            racket/file
            racket/generator
            "interpreter/browser-services.rkt"
-           "../hypertext-browser/main.rkt")
+           "../hypertext-browser/main.rkt"
+           "../hypertext-browser/uri.rkt")
   (define services (make-object browser-services% (make-hash)))
   (define-runtime-path semantics.rkt "semantics.rkt")
-  (define semantics-url (url->string (path->url semantics.rkt)))
+  (define semantics-url (path->uri semantics.rkt))
   (define semantics-text (file->string semantics.rkt))
   (define semantics-request (file/request (make-hypertext-browser) 
                                  semantics-url))

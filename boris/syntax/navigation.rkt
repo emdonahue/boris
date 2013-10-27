@@ -11,7 +11,8 @@
 (require "state.rkt"
          "../semantics.rkt"
          "../../hypertext-browser/main.rkt"
-         "../../utils/emd/emd.rkt")
+         "../../utils/emd/emd.rkt"
+         "../../hypertext-browser/uri.rkt")
 
 ; The most basic navigation form, this dispatches to hypertext-browser's generic hypertex/get.
 (define-syntax-rule (go url-or-urls subcrawls ...)
@@ -21,7 +22,7 @@
                ([current-document document]
                 [current-parameters parameters])
              (for/list ([url (->list url-or-urls)])
-               (hypertext/get document url)))))
+               (hypertext/get document (string->uri url))))))
         subcrawls ...))
 
 ; Click models a browser click action, assigning an appropriate Referer header.
@@ -66,8 +67,7 @@
   (require rackunit
            racket/class
            racket/generator
-           racket/runtime-path
-           net/url
+           racket/runtime-path           
            racket/promise
            racket/file
            "../interpreter/browser-services.rkt"
@@ -79,5 +79,5 @@
   (define services (make-object browser-services% (make-hash)))
   (define-runtime-path navigation.rkt "navigation.rkt")
   
-  (check-equal? (browser-body (crawl-state-browser (force (car ((car (go (url->string (path->url navigation.rkt)))) state services))))) (file->string navigation.rkt))
+  (check-equal? (browser-body (crawl-state-browser (force (car ((car (go (uri->string (path->uri navigation.rkt)))) state services))))) (file->string navigation.rkt))
   )
