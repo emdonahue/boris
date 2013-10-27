@@ -11,7 +11,8 @@
   [->symbol (-> (or/c string? symbol?) symbol?)]
   [->list (-> any/c list?)]
   [car/or (-> list? any/c any/c)]
-  [value->file (-> path-string? any/c any/c)])
+  [value->file (-> path-string? any/c any/c)]
+  [combine-path (-> path-string? path-string? path-string?)])
  debug-mode)
 
 ; DEBUGGING
@@ -87,7 +88,7 @@
 ; FILE
 
 (define (combine-path base rel)
-  (if (absolute-path? rel) rel
+  (if (absolute-path? rel) (if (path? rel) rel (string->path rel))
       (let-values ([(dir name dir?) (split-path base)])
         (if dir? (build-path base rel)
             (build-path dir rel)))))
@@ -96,7 +97,7 @@
 (module+ test
   (require rackunit)
   
-  (check-equal? (combine-path "/foo/bar/" "/baz") "/baz")
+  (check-equal? (combine-path "/foo/bar/" "/baz") (string->path "/baz"))
   (check-equal? (combine-path "/foo/bar/" "baz") (string->path "/foo/bar/baz"))
   (check-equal? (combine-path "/foo/bar" "baz") (string->path "/foo/baz"))
   
