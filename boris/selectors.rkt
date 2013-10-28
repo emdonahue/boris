@@ -60,27 +60,17 @@
 (provide (proc-doc/names forms 
                          (->* () (dict? (or/c string? (listof string?))) (listof html:form/c)) (() ((data '()) (html (browser-body (current-document))))) @{Scans @racket[html] for any html forms and returns a list of @racket[form/c]s ready to supply to the submit form. Each form's fields will be filled out with any name/value pairs supplied in @racket[data]. If @racket[html] is provided, html will be used instead of the default of the current page text. If @racket[html] is a list, forms will run on each element of the list and all forms found in any element will be returned in a flattened list. This makes @racket[forms] suitable for use with @racket[xpath] to submit only specific forms.}))
 (define (forms [data '()] [html (browser-body (current-document))])
-  (display html)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
-  (newline)
   (html:forms html data))
 
 
 
 (provide (proc-doc/names links 
-                         (->* () (regexp? string?) (listof string)) (() ((link-regexp #rx".") (html (browser-body (current-document))))) @{Returns all urls extracted from links on the current page (or passed in @racket[html]) matching @racket[link-regexp].}))
+                         (->* () ((or/c regexp? string?) string?) (listof string?)) (() ((link-regexp #rx".") (html (browser-body (current-document))))) @{Returns all urls extracted from links on the current page (or passed in @racket[html]) matching @racket[link-regexp].}))
 
 (define (links [rx #rx"."] [html (browser-body (current-document))])
   (html:links html rx))
 
-(provide (proc-doc/names links/text (->* (regexp?) (string?) (listof string)) ((link-text-regexp) ((html (browser-body (current-document))))) @{Returns all urls extracted from links on the current page (or passed in @racket[html]) with link text matching @racket[link-text-regexp].}))
+(provide (proc-doc/names links/text (->* ((or/c regexp? string?)) (string?) (listof string?)) ((link-text-regexp) ((html (browser-body (current-document))))) @{Returns all urls extracted from links on the current page (or passed in @racket[html]) with link text matching @racket[link-text-regexp].}))
 (define (links/text rx [html (browser-body (current-document))])
   (html:links/text html rx))
 

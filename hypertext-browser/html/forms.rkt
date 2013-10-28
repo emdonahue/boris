@@ -8,9 +8,7 @@
 ;TODO figure out how to include this for-doc
 (define form/c (cons/c string?
                        (cons/c symbol?
-                               (listof (cons/c 
-                                          symbol?
-                                          string?)))))
+                               (listof (listof any/c)))))
 
 (require racket/contract/base
          scribble/srcdoc
