@@ -8,7 +8,8 @@
 
 ; IMPLEMENTATION
 
-(require "state.rkt"
+(require racket/list
+         "state.rkt"
          "../semantics.rkt"
          "../../hypertext-browser/main.rkt"
          "../../utils/emd/emd.rkt"
@@ -33,7 +34,7 @@
                ([current-document document]
                 [current-parameters parameters])
              (for/list ([url (->list url-or-urls)])
-               (http/click document url)))))
+               (http/click document (string->uri url))))))
         subcrawls ...))
 
 ; Submit acts like browser submission, posting data and setting the proper headers.
@@ -44,7 +45,7 @@
                ([current-document document]
                 [current-parameters parameters])
              (for/list ([form forms])
-               (http/submit document (first form) (third form))))))
+               (http/submit document (string->uri (first form)) (third form) #:method (second form))))))
         subcrawl ...))
 
 ;(define-syntax-rule (fragment fragments subcrawls ...)

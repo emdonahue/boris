@@ -31,8 +31,7 @@
          racket/port
          racket/list
          racket/dict
-         racket/string
-         "../hypertext-browser/url.rkt")
+         racket/string)
 
 (define-values (echo-server-dispatch echo-server-url)
   (dispatch-rules
@@ -71,7 +70,7 @@
       (lambda () 
         (write 
          `((method . ,(request-method req)) 
-           (uri . ,(url->string/raw (request-uri req))) 
+           (uri . ,(url->path&query&fragment (request-uri req))) 
            (headers . ,(req->headers req))
            (data . ,(request-post-data/raw req))))))))
 
@@ -107,8 +106,8 @@
        (header-value header))))
 
 
-(define (url->string/raw u)
-  (string-append (or (url-scheme u) "") "://" (or (url-host u) "") (url->path&query&fragment u)))                
+;(define (url->string/raw u)
+;  (string-append (or (url-scheme u) "") "://" (or (url-host u) "") (url->path&query&fragment u)))                
 
 ; Returns everything following the host as a raw string. 
 (define (url->path&query&fragment u) 

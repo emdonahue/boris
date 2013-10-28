@@ -39,10 +39,11 @@
  
  (proc-doc/names http/submit
                  (->* (hypertext-browser? uri?)
-                      (dict?) 
+                      (dict?
+                       #:method symbol?) 
                       http-request?)
-                 ((browser url) ((data '())))
-                 @{Creates a form submit function from the current state of @racket[browser].}))
+                 ((browser url) ((data '()) (method 'POST)))
+                 @{Creates a form submit function from the current state of @racket[browser]. If @racket[method] is @racket['GET], @racket[data] will be sent as @racket[uri-query].}))
 
 (require racket/serialize
          racket/date
@@ -69,8 +70,9 @@
 
 (define (http-request-data/encoded request)
   (if (http-request-data request)
-      (cond
-        [(string=? (dict-ref (http-request-header request) 'Content-Type) "application/x-www-form-urlencoded") (alist->form-urlencoded (http-request-data request))])
+      (if (string=? (dict-ref (http-request-header request) 'Content-Type "") "application/x-www-form-urlencoded") 
+          (alist->form-urlencoded (http-request-data request))
+          #f)
       #f))
 
 ; Request Constructors
@@ -100,9 +102,11 @@
                 ;#:data (http-request-data (browser-request browser))))
 
 (define (http/submit browser url [data #f] #:method [method 'POST])
-  (dbg #f (http/request browser url #:method method 
-                                   #:headers `((Referer . ,(uri->string (browser-url browser)))
-                                              (Content-Type . "application/x-www-form-urlencoded")) 
+  (dbg #f (http/request browser (if (equal? method 'GET) (uri->form-urlencoded (uri-query-params-set url data)) url) #:method method 
+                                   #:headers (append `((Referer . ,(uri->string (browser-url browser))))
+                                                     (if (equal? method 'POST) 
+                                                         '((Content-Type . "application/x-www-form-urlencoded")) '()))
+                                                         
                                    #:data data)))
   
 ; Request Client
@@ -146,7 +150,9 @@
   (require rackunit
            "../echo-server/main.rkt")
   
-  (http/submit (make-hypertext-browser) "http://foo.com?bar=baz" 
+  (let ([submit (http/submit (make-hypertext-browser) (string->uri "http://foo.com?bar=baz") '((fuzz . "buzz ?")) #:method 'GET)])
+    (check-equal? (http-request-header submit) '((Referer . "")))
+    (check-equal? (uri->string (request-url submit)) "http://foo.com?fuzz=buzz+%3F"))
   
   (define (echo->body browser)
     (read (open-input-string (browser-body browser))))
