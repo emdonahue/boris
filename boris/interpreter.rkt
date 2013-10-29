@@ -42,13 +42,13 @@
 
 
 
-(define (spider/generator web #:cache [cache #f])
+(define (spider/generator web #:cache [cache #f]  #:user-agent [user-agent "Boris"])
   (generator () (crawl 
-                 (crawl-state (make-hypertext-browser) '() web)
+                 (crawl-state (make-hypertext-browser #:user-agent user-agent) '() web)
                  (make-object browser-services% cache))))
 
-(define (spider web #:cache [cache #f])
-  (for/list ([fly (in-producer (spider/generator web #:cache cache) (void))]) fly))
+(define (spider web #:cache [cache #f] #:user-agent [user-agent "Boris"]))
+  (for/list ([fly (in-producer (spider/generator web #:cache cache #:user-agent user-agent) (void))]) fly))
 
 ; Run the crawl, threading new states into sub webs.
 (define (crawl state services)
