@@ -159,8 +159,8 @@
   (require rackunit
            "../echo-server/main.rkt")
   
-  (let ([submit (http/submit (make-hypertext-browser) (string->uri "http://foo.com?bar=baz") '((fuzz . "buzz ?")) #:method 'GET)])
-    (check-equal? (http-request-header submit) '((Referer . "")))
+  (let ([submit (http/submit (make-hypertext-browser #:user-agent "hypertext-browser") (string->uri "http://foo.com?bar=baz") '((fuzz . "buzz ?")) #:method 'GET)])
+    (check-equal? (http-request-header submit) '((User-Agent . "hypertext-browser") (Referer . "")))
     (check-equal? (uri->string (request-url submit)) "http://foo.com?fuzz=buzz+%3F"))
   
   (define (echo->body browser)
