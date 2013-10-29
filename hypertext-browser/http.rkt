@@ -104,7 +104,7 @@
 (define (http/redirect browser url)
   (http/request browser url 
                 #:method 'GET ;(http-request-method (browser-request browser))
-                #:headers `((Referer . ,(uri->string (browser-url browser)))))) ; (headers-set (http-request-header (browser-request browser)) 'Referer (url->string/raw (browser-url browser)))
+                #:headers `((Referer . ,(or (dict-ref (browser-head browser) 'Referer #f) (uri->string (browser-url browser))))))) ; (headers-set (http-request-header (browser-request browser)) 'Referer (url->string/raw (browser-url browser)))
                 ;#:data (http-request-data (browser-request browser))))
 
 (define (http/submit browser url [data #f] #:method [method 'POST])

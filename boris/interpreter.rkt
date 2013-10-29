@@ -15,17 +15,19 @@
  (proc-doc/names 
   spider
   (->* (web/c)
-       (#:cache (or/c dict? #f))
+       (#:cache (or/c dict? #f)
+                #:user-agent (or/c string? #f))
        (listof any/c))
-  ((web) ((cache #f)))
+  ((web) ((cache #f) (user-agent "Boris")))
   @{"Spiders" a web, returning a list of all values extracted by the spider during its crawl. @racket[cache] is shared among all branches of the crawl, and allows the spider to avoid making network requests twice. If a persistent cache (such as @racket[fs-dict] is used, pages can be cached between crawls, allowing the spider to quickly redo a crawl up to a point of failure, or for a crawl to be modified and re-run entirely offline.})
  
  (proc-doc/names
   spider/generator
   (->* (web/c)
-       (#:cache (or/c dict? #f))
+       (#:cache (or/c dict? #f)
+                #:user-agent (or/c string? #f))
        generator?)
-  ((web) ((cache #f)))
+  ((web) ((cache #f) (user-agent "Boris")))
   @{Similar to @racket[spider], but returns a generator that yields each extracted value as it is encountered, so results can be processed as they come in.}))
 
 ; IMPLEMENTATION
