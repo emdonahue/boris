@@ -85,7 +85,7 @@
 (serializable-struct request (url) #:transparent)
 
 (define (make-hypertext-browser #:user-agent [user-agent #f])
-  (dbg "browser" (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ((http . ((cookies . ()) (user-agent . ,user-agent)))))))))
+  (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ((http . ((cookies . ()) (user-agent . ,user-agent))))))))
 
 ; Mutators
 

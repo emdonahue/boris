@@ -78,6 +78,9 @@
 (define (browser-cookies browser)
   (dict-ref (dict-ref (browser-state browser) 'http) 'cookies))
 
+(define (browser-user-agent browser)
+  (dict-ref (dict-ref (browser-state browser) 'http) 'user-agent))
+
 ; Request Constructors
 
 (define (http/request browser url/relative #:method [method 'GET] #:headers [headers '()] #:data [data #f])
@@ -88,9 +91,9 @@
                   method 
                   (dbg #f 
                         (headers-Cookie-set 
-                         headers 
+                         (headers-set headers 'User-Agent (browser-user-agent browser))
                          (cookies-ref (browser-cookies browser) url)
-                         )) 
+                         ))
                   data)))
 
 (define (http/click browser url)

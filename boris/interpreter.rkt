@@ -47,7 +47,7 @@
                  (crawl-state (make-hypertext-browser #:user-agent user-agent) '() web)
                  (make-object browser-services% cache))))
 
-(define (spider web #:cache [cache #f] #:user-agent [user-agent "Boris"]))
+(define (spider web #:cache [cache #f] #:user-agent [user-agent "Boris"])
   (for/list ([fly (in-producer (spider/generator web #:cache cache #:user-agent user-agent) (void))]) fly))
 
 ; Run the crawl, threading new states into sub webs.

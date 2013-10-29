@@ -23,7 +23,7 @@
  
  (proc-doc/names
   headers-set 
-  (-> headers/c symbol? string? headers/c)
+  (-> headers/c symbol? (or/c #f string?) headers/c)
   (headers-alist header-field value)
   @{Removes all @racket[header-field] headers from @racket[headers-alist] and inserts @racket[value] as the new @racket[header-field] header.})
  
@@ -75,7 +75,7 @@
                (string->bytes/utf-8 value)))))
 
 (define (headers-set headers field value)
-  (append (list (cons field value))
+  (append (if value `((,field . ,value)) '())
           (filter-not (lambda (field-value)
                         (equal? field 
                                 (car field-value)))
@@ -114,7 +114,8 @@
   (check-equal? (uri->string (headers-Location (headers->alist head))) (uri->string (string->uri "http://bar.com")))
   
   (let ([headers (headers->alist head)])
-    (check-equal? (headers-set headers 'Set-Cookie "fu=chu") '((Set-Cookie . "fu=chu") (Location . "http://bar.com"))))
+    (check-equal? (headers-set headers 'Set-Cookie "fu=chu") '((Set-Cookie . "fu=chu") (Location . "http://bar.com")))
+    (check-equal? (headers-set headers 'Set-Cookie #f) '((Location . "http://bar.com"))))
   
   ; Cookies
   (check-equal? (headers-Set-Cookies (headers->alist head) (string->uri "http://fiz.com") (list (cookie "foo" "fyy" "baz.com" "/bar"))) 
