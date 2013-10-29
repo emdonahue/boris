@@ -19,8 +19,8 @@
               @{Represents the browsing history a browser after a sequence of requests have been made.})
  
  (proc-doc/names make-hypertext-browser
-                 (-> hypertext-browser?)
-                 ()
+                 (->* () (dict?) hypertext-browser?)
+                 (() ((state '((http . ((cookies . ())))))))
                  @{Initializes a new browser pointing to a blank page.})
  
  (struct*-doc response
@@ -84,8 +84,8 @@
 ; A request containing all information required to obtain a document from an external server.
 (serializable-struct request (url) #:transparent)
 
-(define (make-hypertext-browser)
-  (dbg "browser" (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ((http . ((cookies . ())))))))))
+(define (make-hypertext-browser [state '((http . ((cookies . ()))))])
+  (dbg "browser" (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ,state)))))
 
 ; Mutators
 
