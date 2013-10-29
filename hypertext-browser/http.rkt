@@ -75,19 +75,22 @@
           #f)
       #f))
 
+(define (browser-cookies browser)
+  (dict-ref (dict-ref (browser-state browser) 'http) 'cookies))
+
 ; Request Constructors
 
 (define (http/request browser url/relative #:method [method 'GET] #:headers [headers '()] #:data [data #f])
   (let ([url (combine-uri (browser-url browser) url/relative)])
     (dbg #f (uri->string url))
-    (dbg #f (browser-state browser))
+    (dbg #f (browser-cookies browser))
     (http-request url
                   method 
                   (dbg #f 
                         (headers-Cookie-set 
                          headers 
-                         (dbg #f (cookies-ref (browser-state browser) url)))
-                        ) 
+                         (cookies-ref (browser-cookies browser) url)
+                         )) 
                   data)))
 
 (define (http/click browser url)
@@ -113,11 +116,14 @@
 
 (define (request->browser request browser) 
   (let* ([response (request->response request)]
-         [state (dbg #f (headers-Set-Cookies 
+         [cookies (dbg #f (headers-Set-Cookies 
                          (response-head response)
                          (request-url request) 
-                         (browser-state browser)))]
-         [browser (browser:next browser request response state)])
+                         (browser-cookies browser)))]
+         [state (browser-state browser)]
+         [http-state (dict-ref state 'http)]
+         
+         [browser (browser:next browser request response (dict-set state 'http (dict-set http-state 'cookies cookies)))])
     (dbg #f state)
     (match (dict-ref (response-head response) 'Location #f)
       [#f browser]
@@ -169,6 +175,6 @@
   (check-equal? (uri->string (browser-url browser2)) "http://localhost:60415/redirected")
 
   (check-equal? (dict-ref (dict-ref (echo->body browser3) 'headers) #"Cookie") #"send2all=v1")
-  (check-equal? (length (browser-state browser3)) 2)
+  (check-equal? (length (browser-cookies browser3)) 2)
   
   (kill-thread server))

@@ -15,7 +15,7 @@
  
  ; Ddatatypes
  (struct*-doc hypertext-browser
-              ([history (listof (list/c request? response? list?))])
+              ([history (listof (list/c request? response? (listof (cons/c symbol? any/c))))])
               @{Represents the browsing history a browser after a sequence of requests have been made.})
  
  (proc-doc/names make-hypertext-browser
@@ -66,10 +66,11 @@
                  @{Returns a browser that has the history of @racket[browser] but advanced one place to contain @racket[request] @racket[response] and @racket[state].})
  (contract-out
   [browser-history-verbose (-> hypertext-browser? void?)]
-  [browser-state (-> hypertext-browser? list?)]))
+  [browser-state (-> hypertext-browser? (listof any/c))]))
 
 (require racket/serialize
          racket/list
+         "../utils/emd/emd.rkt"
          racket/date)
 
 ; Datatypes
@@ -84,7 +85,7 @@
 (serializable-struct request (url) #:transparent)
 
 (define (make-hypertext-browser)
-  (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ()))))
+  (dbg "browser" (hypertext-browser `((,(request (string->uri "")) ,(response "" '() "" (current-date)) ((http . ((cookies . ())))))))))
 
 ; Mutators
 
