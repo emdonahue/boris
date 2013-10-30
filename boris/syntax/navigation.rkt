@@ -22,7 +22,8 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([url (->list url-or-urls)])
+             (for/list ([url (->list url-or-urls)]
+                        #:unless (or (not url) (void? url)))
                (hypertext/get document (string->uri url))))))
         subcrawls ...))
 
@@ -33,7 +34,8 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([url (->list url-or-urls)])
+             (for/list ([url (->list url-or-urls)]
+                        #:unless (or (not url) (void? url)))
                (http/click document (string->uri url))))))
         subcrawls ...))
 
@@ -44,7 +46,8 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([form forms])
+             (for/list ([form forms]
+                        #:unless (or (not form) (void? form)))
                (http/submit document (string->uri (first form)) (third form) #:method (second form))))))
         subcrawl ...))
 
