@@ -98,6 +98,7 @@
           racket/string
           racket/dict
           net/uri-codec
+          "html/html-entities.rkt"
           "../utils/emd/emd.rkt")
 
 ; DATATYPES ==============================
@@ -180,7 +181,7 @@
                               "(?:://([^/?#]*))?" ; authority
                               "([^?#]*)" ; path
                               "(?:\\?([^#]*))?" ; query
-                              "(?:#(\\S*))?\\s*$")) s)) ; fragment
+                              "(?:#(\\S*))?\\s*$")) (html-decode* s))) ; fragment
     [(list scheme authority path query fragment)
      (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,(if (string=? "" path) #f path) ,query ,fragment))]))
 
@@ -236,7 +237,7 @@
   ; Parameters
   
   (check-equal? 
-   (uri-query-params (string->uri "http://foo.com?bar=baz&fuzz= buzz ?"))
+   (uri-query-params (string->uri "http://foo.com?bar=baz&amp;amp;fuzz= buzz ?"))
    '((bar . "baz") (fuzz . " buzz ?")))
   
   (check-equal? (uri->string (uri->form-urlencoded (string->uri "http://foo.com?bar=baz&fuzz= buzz ?"))) "http://foo.com?bar=baz&fuzz=+buzz+%3F")
