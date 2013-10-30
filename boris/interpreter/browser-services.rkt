@@ -19,6 +19,7 @@
          racket/generator
          racket/class
          racket/dict
+         racket/serialize
          "services.rkt"
          "../semantics/state.rkt"
          "../../hypertext-browser/main.rkt"
@@ -33,17 +34,17 @@
     (init-field (cache #f))
     
     (define/public (request state req)
-      (delay (let ([cached-response (and cache (cache->response cache req))])
+      (delay (let ([cached-browser (cache->response cache req)])
                ; If we have a cached response, just return that.
-               (if cached-response
-                   (state->cached-state state req cached-response)
+               (if cached-browser
+                   (state->cached-state state cached-browser)
                    ; Otherwise fetch a new document and
                    (let ([new-state (state->new-state state req)])
                      ; add it to the cache, if we have one.
                      (when cache
                        (dict-set! cache 
-                                  (uri->string (request-url req)) 
-                                  (browser-response (crawl-state-browser new-state))))
+                                  (serialize req)
+                                  (serialize (crawl-state-browser new-state))))
                      new-state)))))    
     
     ; Extract yields all extracted values to an enclosing generator.
@@ -54,16 +55,13 @@
 
 ; Look up a request in the cache.
 (define (cache->response cache req)
-  (and cache (dict-ref cache (uri->string (request-url req)) #f)))
+  (let ([cached-browser (and cache (dict-ref cache (serialize req) #f))])
+    (if cached-browser (deserialize cached-browser) #f)))
 
 ; Build a new state from a cached response.
-(define (state->cached-state state request cached-response)
+(define (state->cached-state state cached-response)
   (struct-copy crawl-state state 
-               [browser (browser:next 
-                         (crawl-state-browser state)
-                         request 
-                         cached-response
-                         (browser-state (crawl-state-browser state)))]))
+               [browser cached-response]))
 
 ; Perform a request and build a new state from it.
 (define (state->new-state state request)

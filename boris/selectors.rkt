@@ -7,7 +7,7 @@
          scribble/srcdoc
          racket/contract/base
          racket/dict
-         (prefix-in net/ net/url)
+         "../hypertext-browser/uri.rkt"
          (for-doc racket/base
                   scribble/manual)
          (prefix-in html: "../hypertext-browser/html.rkt"))
@@ -15,15 +15,18 @@
 
 ; BASIC ACCESSORS
 
-(provide (proc-doc/names head (-> (listof (cons/c symbol? string?))) () @{Returns the headers of the most recent response.}))
+(provide (proc-doc/names head 
+                         (-> (listof (cons/c symbol? string?))) () @{Returns the headers of the most recent response.}))
 (define (head) (cons 
                 (response-status (browser-response (current-document)))
                 (browser-head (current-document))))
 
-(provide (proc-doc/names body (-> string?) () @{Returns the text of the current page.}))
+(provide (proc-doc/names body
+                         (-> string?) () @{Returns the text of the current page.}))
 (define (body) (browser-body (current-document)))
 
-(provide (proc-doc/names url (-> net/url?) () @{Returns the current url.}))
+(provide (proc-doc/names url 
+                         (-> uri?) () @{Returns the current url.}))
 (define (url) (browser-url (current-document)))
 
 (provide (proc-doc/names previous-request (-> request?) () @{Returns the @racket[request] corresponding to the current page.}))

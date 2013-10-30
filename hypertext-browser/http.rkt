@@ -134,7 +134,7 @@
       )))
 
 (define (request->response request)
-  (parameterize ([debug-mode #t])
+  (parameterize ([debug-mode #f])
   (let ([u (request-url request)])
     (dbg "url" (uri->string u))
     (let-values ([(status header port)
