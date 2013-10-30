@@ -20,6 +20,7 @@
          racket/class
          racket/dict
          racket/serialize
+         racket/list
          "services.rkt"
          "../semantics/state.rkt"
          "../../hypertext-browser/main.rkt"
@@ -34,17 +35,14 @@
     (init-field (cache #f))
     
     (define/public (request state req)
-      (delay (let ([cached-browser (cache->response cache req)])
-               ; If we have a cached response, just return that.
-               (if cached-browser
-                   (state->cached-state state cached-browser)
+      (delay (let ([cached-state (cache->state cache state req)])
+               ; If we have a cached response, just return that.               
+               (if cached-state
+                   cached-state
                    ; Otherwise fetch a new document and
                    (let ([new-state (state->new-state state req)])
                      ; add it to the cache, if we have one.
-                     (when cache
-                       (dict-set! cache 
-                                  (serialize req)
-                                  (serialize (crawl-state-browser new-state))))
+                     (state->cache new-state cache req)
                      new-state)))))    
     
     ; Extract yields all extracted values to an enclosing generator.
@@ -54,19 +52,28 @@
         (when (and e (not (void? e))) (yield e))))))
 
 ; Look up a request in the cache.
-(define (cache->response cache req)
-  (let ([cached-browser (and cache (dict-ref cache (serialize req) #f))])
-    (if cached-browser (deserialize cached-browser) #f)))
+(define (cache->state cache state req)
+  (let ([cached-browser-state (and cache (dict-ref cache (serialize req) #f))])
+    (if cached-browser-state (state->cached-state state (deserialize cached-browser-state)) #f)))
 
 ; Build a new state from a cached response.
 (define (state->cached-state state cached-response)
   (struct-copy crawl-state state 
-               [browser cached-response]))
+               [browser (hypertext-browser 
+                         (cons cached-response 
+                               (hypertext-browser-history 
+                                (crawl-state-browser state))))]))
 
 ; Perform a request and build a new state from it.
 (define (state->new-state state request)
   (struct-copy crawl-state state
                [browser (request (crawl-state-browser state))]))
+
+(define (state->cache state cache req)
+  (when cache
+    (dict-set! cache 
+               (serialize req)
+               (serialize (first (hypertext-browser-history (crawl-state-browser state)))))))
 
 ; TESTS
 
@@ -78,7 +85,8 @@
            "../../hypertext-browser/base.rkt")
   
   (define foo-response (response 0 '() "foo" (current-date)))
-  (define cache (make-hash `(("file:///foo" . ,foo-response))))
+  (define cache (make-hash))
+                 ;`(("file:///foo" . ,foo-response))))
   (define services (make-object browser-services% cache))
   (define state (crawl-state (make-hypertext-browser) '() '()))
   
@@ -88,8 +96,13 @@
   
   (define services-request (file/request (crawl-state-browser state) services-url))
   
-  (check-equal? (browser-body (crawl-state-browser (force (send services request state services-request)))) (file->string services.rkt))
+  (define new-browser (crawl-state-browser (force (send services request state services-request))))
   
+  (check-equal? (browser-body new-browser) (file->string services.rkt))
+  
+  ; Test cache
+  (check-equal? (dict-ref cache (serialize services-request)) (serialize (first (hypertext-browser-history new-browser))))
+
   
   ;(define foo-request (file/request (crawl-state-browser state) (string->uri "file:///foo")))
   ;(check-equal? (browser-body (crawl-state-browser (force (send services request state foo-request)))) "foo")
