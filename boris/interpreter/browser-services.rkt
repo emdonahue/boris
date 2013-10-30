@@ -10,6 +10,7 @@
  (contract-out
   [browser-services% (class/c
                       (init-field [cache (or/c dict? #f)])
+                      (init-field [time-delay (or/c #f real? (-> real?))])
                       [request (->m crawl-state? request? promise?)]
                       [extract (->m (listof any/c) void?)])]))
  
@@ -21,6 +22,7 @@
          racket/dict
          racket/serialize
          racket/list
+         racket/match
          "services.rkt"
          "../semantics/state.rkt"
          "../../hypertext-browser/main.rkt"
@@ -33,6 +35,7 @@
     (services<%>)
     (super-new)
     (init-field (cache #f))
+    (init-field (time-delay #f))
     
     (define/public (request state req)
       (delay (let ([cached-state (cache->state cache state req)])
@@ -43,6 +46,7 @@
                    (let ([new-state (state->new-state state req)])
                      ; add it to the cache, if we have one.
                      (state->cache new-state cache req)
+                     (sleep-for time-delay)
                      new-state)))))    
     
     ; Extract yields all extracted values to an enclosing generator.
@@ -69,11 +73,20 @@
   (struct-copy crawl-state state
                [browser (request (crawl-state-browser state))]))
 
+; Insert the current page into the cache.
 (define (state->cache state cache req)
   (when cache
     (dict-set! cache 
                (serialize req)
                (serialize (first (hypertext-browser-history (crawl-state-browser state)))))))
+
+; Delay to reduce network strain.
+(define (sleep-for time-delay)
+  (cond 
+    [(equal? time-delay #f) (void)]
+    [(procedure? time-delay) (sleep (time-delay))]
+    [(real? time-delay) (sleep time-delay)]
+    ))
 
 ; TESTS
 
@@ -87,7 +100,7 @@
   (define foo-response (response 0 '() "foo" (current-date)))
   (define cache (make-hash))
                  ;`(("file:///foo" . ,foo-response))))
-  (define services (make-object browser-services% cache))
+  (define services (make-object browser-services% cache .2))
   (define state (crawl-state (make-hypertext-browser) '() '()))
   
   (define-runtime-path services.rkt "services.rkt")

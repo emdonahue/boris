@@ -16,18 +16,20 @@
   spider
   (->* (web/c)
        (#:cache (or/c dict? #f)
-                #:user-agent (or/c string? #f))
+                #:user-agent (or/c string? #f)
+                #:delay (or/c #f real? (-> real?)))
        (listof any/c))
-  ((web) ((cache #f) (user-agent "Boris")))
-  @{"Spiders" a web, returning a list of all values extracted by the spider during its crawl. @racket[cache] is shared among all branches of the crawl, and allows the spider to avoid making network requests twice. If a persistent cache (such as @racket[fs-dict] is used, pages can be cached between crawls, allowing the spider to quickly redo a crawl up to a point of failure, or for a crawl to be modified and re-run entirely offline.})
+  ((web) ((cache #f) (user-agent "Boris") (delay #f)))
+  @{"Spiders" a web, returning a list of all values extracted by the spider during its crawl. @racket[cache] is shared among all branches of the crawl, and allows the spider to avoid making network requests twice. If a persistent cache (such as @racket[fs-dict] is used, pages can be cached between crawls, allowing the spider to quickly redo a crawl up to a point of failure, or for a crawl to be modified and re-run entirely offline. The spider will sleep @racket[delay] seconds after every network request unless @racket[delay] is @racket[#f].})
  
  (proc-doc/names
   spider/generator
   (->* (web/c)
        (#:cache (or/c dict? #f)
-                #:user-agent (or/c string? #f))
+                #:user-agent (or/c string? #f)
+                #:delay (or/c #f real? (-> real?)))
        generator?)
-  ((web) ((cache #f) (user-agent "Boris")))
+  ((web) ((cache #f) (user-agent "Boris") (delay #f)))
   @{Similar to @racket[spider], but returns a generator that yields each extracted value as it is encountered, so results can be processed as they come in.}))
 
 ; IMPLEMENTATION
@@ -44,12 +46,16 @@
 
 
 
-(define (spider/generator web #:cache [cache #f]  #:user-agent [user-agent "Boris"])
+(define (spider/generator web #:cache [cache #f]  
+                          #:user-agent [user-agent "Boris"] 
+                          #:delay [delay #f])
   (generator () (crawl 
                  (crawl-state (make-hypertext-browser #:user-agent user-agent) '() web)
-                 (make-object browser-services% cache))))
+                 (make-object browser-services% cache delay))))
 
-(define (spider web #:cache [cache #f] #:user-agent [user-agent "Boris"])
+(define (spider web #:cache [cache #f] 
+                #:user-agent [user-agent "Boris"]
+                #:delay [delay #f])
   (for/list ([fly (in-producer (spider/generator web #:cache cache #:user-agent user-agent) (void))]) fly))
 
 ; Run the crawl, threading new states into sub webs.
