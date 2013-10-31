@@ -49,9 +49,9 @@
  
  (proc-doc/names
   string->uri 
-  (-> string? uri?)
+  (-> (or/c string? uri?) uri?)
   (uri-string)
-  @{Parses @racket[uri-string] into a @racket[uri].})
+  @{Parses @racket[uri-string] into a @racket[uri]. If a @racket[uri?] is passed in, it is returned untouched.})
  
  (proc-doc/names
   uri->string 
@@ -175,15 +175,16 @@
        (if port (string-append ":" (number->string port)) ""))))
 
 (define (string->uri s)
-  (match (cdr (regexp-match (pregexp
-                             (string-append 
-                              "^\\s*(?:([\\w\\d+-.]+)(?=://))?" ; scheme  
-                              "(?:://([^/?#]*))?" ; authority
-                              "([^?#]*)" ; path
-                              "(?:\\?([^#]*))?" ; query
-                              "(?:#(\\S*))?\\s*$")) (html-decode* s))) ; fragment
-    [(list scheme authority path query fragment)
-     (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,(if (string=? "" path) #f path) ,query ,fragment))]))
+  (if (uri? s) s
+      (match (cdr (regexp-match (pregexp
+                                 (string-append 
+                                  "^\\s*(?:([\\w\\d+-.]+)(?=://))?" ; scheme  
+                                  "(?:://([^/?#]*))?" ; authority
+                                  "([^?#]*)" ; path
+                                  "(?:\\?([^#]*))?" ; query
+                                  "(?:#(\\S*))?\\s*$")) (html-decode* s))) ; fragment
+        [(list scheme authority path query fragment)
+         (apply uri `(,scheme ,@(authority->userinfo&host&port authority) ,(if (string=? "" path) #f path) ,query ,fragment))])))
 
 (define (authority->userinfo&host&port authority)
   (match (cdr (regexp-match (pregexp
@@ -239,6 +240,9 @@
   (check-equal? 
    (uri-query-params (string->uri "http://foo.com?bar=baz&amp;amp;fuzz= buzz ?"))
    '((bar . "baz") (fuzz . " buzz ?")))
+  
+  (let ([ur (string->uri u)])
+    (check-equal? ur (string->uri ur)))
   
   (check-equal? (uri->string (uri->form-urlencoded (string->uri "http://foo.com?bar=baz&fuzz= buzz ?"))) "http://foo.com?bar=baz&fuzz=+buzz+%3F")
   
