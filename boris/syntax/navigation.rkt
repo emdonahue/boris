@@ -46,7 +46,7 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([form forms]
+             (for/list ([form (->list forms)]
                         #:unless (or (not form) (void? form)))
                (http/submit document (string->uri (first form)) (third form) #:method (second form))))))
         subcrawl ...))
@@ -84,4 +84,6 @@
   (define-runtime-path navigation.rkt "navigation.rkt")
   
   (check-equal? (browser-body (crawl-state-browser (force (car ((car (go (uri->string (path->uri navigation.rkt)))) state services))))) (file->string navigation.rkt))
+  
+  (check-equal? (force ((car (submit (void) '())) state services)) '())
   )
