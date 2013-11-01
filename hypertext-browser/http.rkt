@@ -128,10 +128,9 @@
          
          [browser (browser:next browser request response (dict-set state 'http (dict-set http-state 'cookies cookies)))])
     (dbg #f state)
-    (match (dict-ref (response-head response) 'Location #f)
-      [#f browser]
-      [redirect ((http/redirect browser (string->uri redirect)) browser)] ; If we get a Location, run the redirect.
-      )))
+    (let ([redirect (headers-Location (response-head response))])
+      (if redirect ((http/redirect browser redirect) browser) browser))))
+       
 
 (define (request->response request)
   (parameterize ([debug-mode #t])

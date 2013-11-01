@@ -100,7 +100,7 @@
 ; Location         
 (define (headers-Location headers)
   (let ([location (dict-ref headers 'Location #f)])
-    (if location (string->uri location) #f)))
+    (if location (string->uri (encode-location location)) #f)))
 
 ; Percent encodes latin-1 characters from Location headers.
 (define (encode-location loc/latin-1)
