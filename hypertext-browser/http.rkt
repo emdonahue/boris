@@ -134,19 +134,19 @@
       )))
 
 (define (request->response request)
-  (parameterize ([debug-mode #f])
+  (parameterize ([debug-mode #t])
   (let ([u (request-url request)])
     (dbg "url" (uri->string u))
     (let-values ([(status header port)
                   (http-sendrecv 
-                   (dbg "host" (uri-host u))
-                   (dbg "uri" (or (uri-relative-ref u) "/"))
+                   (dbg #f (uri-host u))
+                   (dbg "Path" (or (uri-relative-ref u) "/"))
                    #:ssl? (string=? (uri-scheme u) "https")
-                   #:port (dbg "port" (or (uri-port u) (if (string-ci=? (uri-scheme u) "https") 443 80)))
-                   #:method (dbg "method" (http-request-method request))
-                   #:headers (dbg "header" (alist->headers (http-request-header request)))                   
-                   #:data (dbg "data" (http-request-data/encoded request)))])
-      (response (dbg "STATUS" status) (dbg #f (headers->alist (dbg "RAW HEAD" header))) (port->string port) (current-date))))))
+                   #:port (dbg #f (or (uri-port u) (if (string-ci=? (uri-scheme u) "https") 443 80)))
+                   #:method (dbg #f (http-request-method request))
+                   #:headers (dbg #f (alist->headers (http-request-header request)))                   
+                   #:data (dbg #f (http-request-data/encoded request)))])
+      (response (dbg #f status) (dbg #f (headers->alist (dbg "RAW HEAD" header))) (port->string port) (current-date))))))
 
 ; Utilities
 

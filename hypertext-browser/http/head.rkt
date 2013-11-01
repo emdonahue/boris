@@ -14,7 +14,7 @@
  (proc-doc/names headers->alist
                  (-> (listof bytes?) (listof (cons/c symbol? string?)))
                  (header)
-                 @{Parses a list of header fields as returned by @racket[http-client] into an alist of title-cased symbols -> utf-8 strings.})
+                 @{Parses a list of header fields as returned by @racket[http-client] into an alist of title-cased symbols -> latin-1 strings.})
  
  (proc-doc/names alist->headers
                  (-> (listof (cons/c symbol? string?)) (listof bytes?))
@@ -62,17 +62,17 @@
     (match (regexp-match (byte-pregexp #"([^:]*):(.*)") field)      
       [(list _ field-name field-value) 
        (cons 
-        (string->symbol (string-titlecase (string-trim (bytes->string/utf-8 field-name)))) 
-        (string-trim (bytes->string/utf-8 field-value)))])))
+        (string->symbol (string-titlecase (string-trim (bytes->string/latin-1 field-name)))) 
+        (string-trim (bytes->string/latin-1 field-value)))])))
 
 (define (alist->headers alist)
   (dict-map alist 
             (lambda (field value)
               (bytes-append
-               (string->bytes/utf-8 
+               (string->bytes/latin-1 
                 (symbol->string field))
                #": "
-               (string->bytes/utf-8 value)))))
+               (string->bytes/latin-1 value)))))
 
 (define (headers-set headers field value)
   (append (if value `((,field . ,value)) '())
@@ -102,6 +102,16 @@
   (let ([location (dict-ref headers 'Location #f)])
     (if location (string->uri location) #f)))
 
+; Percent encodes latin-1 characters from Location headers.
+(define (encode-location loc/latin-1)
+  (define loc (string->bytes/latin-1 loc/latin-1))
+  (string-join
+   (flatten    
+    (for/list ([c (bytes->list loc)])
+      (if (> 128 c) 
+          (list->string (list (integer->char c)))
+          (list "%" (string-upcase (number->string c 16)))))) ""))
+
 ; TESTS
 
 (module+ test
@@ -120,4 +130,7 @@
   ; Cookies
   (check-equal? (headers-Set-Cookies (headers->alist head) (string->uri "http://fiz.com") (list (cookie "foo" "fyy" "baz.com" "/bar"))) 
            (list (cookie "foo" "fee" "baz.com" "/bar") 
-                 (cookie "baz" "bax" "fiz.com" "/"))))
+                 (cookie "baz" "bax" "fiz.com" "/")))
+  
+  ; Location
+  (check-equal? (encode-location "abç") "ab%E7"))
