@@ -27,7 +27,13 @@
   xpath/first
   (->* (string? string?) (any/c) any/c)
   ((html xpath-query) ((default #f)))
-  @{Returns @racket[(first (xpath query html))] or @racket[default] if there are no matches.}))
+  @{Returns @racket[(first (xpath query html))] or @racket[default] if there are no matches.})
+ 
+ (proc-doc/names
+  xpath?
+  (-> string? list? void?)
+  (html goal)
+  @{Displays several xpath options for extracting @racket[goal] from @racket[html].}))
 
 ; IMPLEMENTATION
 
@@ -36,6 +42,7 @@
          (planet neil/html-parsing:2:0)
          (planet neil/html-writing:2:0)
          (planet clements/sxml2:1:3)
+         (planet neil/webscraperhelper:1:2/webscraperhelper)
          "../../utils/emd/emd.rkt")
 
 (define (xpath html query)
@@ -51,6 +58,9 @@
 (define (xpath/first html query [default #f])
   (let ([nodes (xpath html query)])
     (if (empty? nodes) default (first nodes))))
+
+(define (xpath? html goal)
+  (webscraperhelper goal (html->xexp html)))
         
 ; TESTS
 
