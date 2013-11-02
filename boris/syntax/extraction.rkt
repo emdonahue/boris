@@ -8,7 +8,8 @@
 
 ; IMPLEMENTATION
 
-(require "state.rkt"         
+(require "state.rkt"  
+         "error.rkt"
          (prefix-in sem: "../semantics.rkt")
          (for-syntax racket/base
                      syntax/parse))
@@ -18,8 +19,9 @@
   (list (sem:extract (lambda (browser bindings)
                        (parameterize ([current-document browser]
                                       [current-parameters bindings])
-                         (list extraction))))))
-
+                         (handle-page-errors
+                           (list extraction)))))))
+  
 ; Extracts a sequence of values to the external system.
 (define-syntax-rule (extract/list extraction subcrawl ...)
   (list (sem:extract (lambda (browser bindings)
