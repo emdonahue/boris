@@ -9,6 +9,7 @@
 (require "../semantics.rkt"
          "../semantics/state.rkt"
          "state.rkt"
+         "error.rkt"
          "../../hypertext-browser/base.rkt")
 
 ; IMPLEMENTATION
@@ -19,7 +20,7 @@
           (parameterize
               ([current-document (crawl-state-browser state)]
                [current-parameters (crawl-state-bindings state)])
-            (print msg)
+            (print (handle-page-errors msg))
             (newline))
           (list state))))
 
@@ -29,7 +30,7 @@
           (parameterize
               ([current-document (crawl-state-browser state)]
                [current-parameters (crawl-state-bindings state)])
-           (with-output-to-file path 
+           (with-output-to-file (handle-page-errors path)
              (lambda () (display (browser-body (current-document))))
              #:mode 'text
              #:exists 'replace))

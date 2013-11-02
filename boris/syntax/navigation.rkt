@@ -11,6 +11,7 @@
 (require racket/list
          "state.rkt"
          "../semantics.rkt"
+         "error.rkt"
          "../../hypertext-browser/main.rkt"
          "../../utils/emd/emd.rkt"
          "../../hypertext-browser/uri.rkt")
@@ -22,7 +23,7 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([url (->list url-or-urls)]
+             (for/list ([url (->list (handle-page-errors url-or-urls))]
                         #:unless (or (not url) (void? url)))
                (hypertext/get document (string->uri url))))))
         subcrawls ...))
@@ -34,7 +35,7 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([url (->list url-or-urls)]
+             (for/list ([url (->list (handle-page-errors url-or-urls))]
                         #:unless (or (not url) (void? url)))
                (http/click document (string->uri url))))))
         subcrawls ...))
@@ -46,7 +47,7 @@
            (parameterize
                ([current-document document]
                 [current-parameters parameters])
-             (for/list ([form (->list forms)]
+             (for/list ([form (->list (handle-page-errors forms))]
                         #:unless (or (not form) (void? form)))
                (http/submit document (string->uri (first form)) (third form) #:method (second form))))))
         subcrawl ...))

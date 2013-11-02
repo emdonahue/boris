@@ -12,6 +12,8 @@
 
 (provide for/web let/web)
 
+;TODO refactor so that let can be dual-cased, and integrate handle-page-errors
+
 ; IMPLEMENTATION
 
 (require racket/dict)

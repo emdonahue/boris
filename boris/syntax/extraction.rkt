@@ -19,15 +19,15 @@
   (list (sem:extract (lambda (browser bindings)
                        (parameterize ([current-document browser]
                                       [current-parameters bindings])
-                         (handle-page-errors
-                           (list extraction)))))))
+                         
+                         (list (handle-page-errors extraction)))))))
   
 ; Extracts a sequence of values to the external system.
 (define-syntax-rule (extract/list extraction subcrawl ...)
   (list (sem:extract (lambda (browser bindings)
                        (parameterize ([current-document browser]
                                       [current-parameters bindings])
-                         extraction)))))
+                         (handle-page-errors extraction))))))
 
 ; TESTS
 

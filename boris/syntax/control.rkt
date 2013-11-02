@@ -10,6 +10,7 @@
   (for-syntax racket/base
               syntax/parse))
 
+;TODO integrate handle-page-errors
 
 (define-syntax (label stx)
   (syntax-parse stx
