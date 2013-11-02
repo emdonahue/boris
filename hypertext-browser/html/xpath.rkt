@@ -57,7 +57,7 @@
 
 (define (xpath/first html query [default #f])
   (let ([nodes (xpath html query)])
-    (if (empty? nodes) default (first nodes))))
+    (if (empty? nodes) default (string-trim (first nodes)))))
 
 (define (xpath? html goal)
   (webscraperhelper goal (html->xexp html)))
