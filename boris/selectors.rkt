@@ -35,6 +35,13 @@
 (provide (proc-doc/names var (-> symbol? any/c) (key) @{Returns the value currently bound to @racket[key] by one of Boris' binding forms.}))
 (define (var key) (dict-ref (current-parameters) key))
 
+; ANAPHORIC QUERIES
+(provide (proc-doc/names regex (-> regexp? (or/c #f (listof string?))) (regexp) @{Applies @racket[regexp] to the current page's html and returns a @racket[regexp-match]. }))
+
+(define (regex rx)
+  (regexp-match rx (browser-body (current-document))))
+
+
 ; RE-EXPORTS OF HTML BROWSER UTILITIES
 
 (provide (proc-doc/names xpath (->* (string?) ((or/c string? (listof string?))) (listof string?)) ((query) ((html (browser-body (current-document))))) @{Applies @racket[query] to @racket[html] and returns a list of matches. By default, html is the text of the current page.}))
