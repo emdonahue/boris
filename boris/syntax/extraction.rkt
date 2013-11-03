@@ -10,6 +10,7 @@
 
 (require "state.rkt"  
          "error.rkt"
+         "../../utils/emd/emd.rkt"
          (prefix-in sem: "../semantics.rkt")
          (for-syntax racket/base
                      syntax/parse))
@@ -27,7 +28,7 @@
   (list (sem:extract (lambda (browser bindings)
                        (parameterize ([current-document browser]
                                       [current-parameters bindings])
-                         (handle-page-errors extraction))))))
+                         (handle-page-errors (->list extraction)))))))
 
 ; TESTS
 

@@ -52,7 +52,6 @@
     ; Extract yields all extracted values to an enclosing generator.
     (define/public (extract extracted)
       (for ([e extracted])
-        
         (when (and e (not (void? e))) (yield e))))))
 
 ; Look up a request in the cache.

@@ -60,9 +60,9 @@
 
 
 (provide (proc-doc/names xpath/first
-                         (->* (string?) (any/c (or/c string? (listof string?))) string?) ((query) ((default #f) (html (browser-body (current-document))))) @{Returns the first result of @racket[xpath] or @racket[default] if @racket[xpath] finds no matches.}))
+                         (->* (string?) ((or/c string? (listof string?)) #:default any/c) (or/c #f string?)) ((query) ((html (browser-body (current-document))) (default #f) )) @{Returns the first result of @racket[xpath] or @racket[default] if @racket[xpath] finds no matches.}))
 
-(define (xpath/first query [default #f] [html (browser-body (current-document))])
+(define (xpath/first query [html (browser-body (current-document))] #:default [default #f])
   (html:xpath/first html query default))
 
 
