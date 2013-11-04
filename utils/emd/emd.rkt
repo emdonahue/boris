@@ -12,7 +12,8 @@
   [->list (-> any/c list?)]
   [car/or (-> list? any/c any/c)]
   [value->file (-> path-string? any/c any/c)]
-  [combine-path (-> path-string? path-string? path-string?)])
+  [combine-path (-> path-string? path-string? path-string?)]
+  [run-time-filename (-> path-string?)])
  debug-mode)
 
 ; DEBUGGING
@@ -28,6 +29,10 @@
   (with-output-to-file file 
     (lambda () (write value))
   #:exists 'replace))
+
+(define (run-time-filename)
+  (let-values ([(dir filename dir?) (split-path (find-system-path 'run-file))])
+     (path-replace-suffix filename "")))
 
 ; COERCION
 
