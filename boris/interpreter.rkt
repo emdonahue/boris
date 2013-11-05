@@ -7,6 +7,7 @@
 (require racket/contract/base
          scribble/srcdoc
          "semantics/state.rkt"
+         "interpreter/error.rkt"
          (for-doc 
           racket/base          
           scribble/manual))
@@ -63,6 +64,7 @@
   (let ([web (crawl-state-web state)])
     (unless (empty? web) ; If our web is empty, prune this branch of the crawl.
       (for* ([next-state ((car web) state services)] ; Otherwise for each following statew
+             #:when (handle-network-errors (force next-state))
             [next-web (cdr (crawl-state-web (force next-state)))]) ; and each of that state's subwebs
           (crawl (struct-copy crawl-state (force next-state) [web next-web]) services))))) ; produce a new state and recurse.
 

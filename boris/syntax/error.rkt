@@ -13,5 +13,6 @@
     stx))
 
 (define (raise-page-error e)
-  (eprintf "Error processing web page at: ~a\n\n" (uri->string (url)))
+  (eprintf "Error in the code handling the page: ~a\n\n" (uri->string (url)))
   (raise e))
+
