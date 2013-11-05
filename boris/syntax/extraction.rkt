@@ -4,11 +4,12 @@
 
 ; DOCUMENTATION 
 
-(provide extract extract/list)
+(provide extract extract/list extract/list+)
 
 ; IMPLEMENTATION
 
-(require "state.rkt"  
+(require racket/list
+         "state.rkt"  
          "error.rkt"
          "../../utils/emd/emd.rkt"
          (prefix-in sem: "../semantics.rkt")
@@ -29,6 +30,15 @@
                        (parameterize ([current-document browser]
                                       [current-parameters bindings])
                          (handle-page-errors (->list extraction)))))))
+
+; Extracts a sequence of values to the external system. Throws an error if the list is empty.
+(define-syntax-rule (extract/list+ extraction subcrawl ...)
+  (list (sem:extract (lambda (browser bindings)
+                       (parameterize ([current-document browser]
+                                      [current-parameters bindings])
+                         (handle-page-errors (if (empty? (->list extraction))
+                                                 (raise (make-exn:fail "Boris assertion failed: list passed to extract/list+ was empty." (current-continuation-marks)))
+                                                 (->list extraction))))))))
 
 ; TESTS
 

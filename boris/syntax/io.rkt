@@ -20,8 +20,8 @@
           (parameterize
               ([current-document (crawl-state-browser state)]
                [current-parameters (crawl-state-bindings state)])
-            (print (handle-page-errors msg))
-            (newline))
+            (when (and (handle-page-errors msg) (not (void? msg))) 
+              (printf "~a\n" msg)))
           (list state))))
 
 ; Downloads the current document to the specified path.
