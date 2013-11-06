@@ -7,4 +7,4 @@
     stx))
 
 (define (suppress-network-error e)
-  (eprintf "Network error:\n\n~a" (exn-message e)) #f)
+  (eprintf "Network error:\n\n~a\n" (exn-message e)) #f)

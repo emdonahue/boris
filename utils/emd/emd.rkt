@@ -1,5 +1,7 @@
 #lang racket
 
+(define maybe-path? (or/c "" path-string?))
+
 (provide 
  (contract-out 
   [dbg (-> (or/c string? #f) any/c any/c)]
@@ -12,7 +14,7 @@
   [->list (-> any/c list?)]
   [car/or (-> list? any/c any/c)]
   [value->file (-> path-string? any/c any/c)]
-  [combine-path (-> path-string? path-string? path-string?)]
+  [combine-path (-> maybe-path? maybe-path? maybe-path?)]
   [run-time-filename (-> path-string?)])
  debug-mode)
 
@@ -102,6 +104,7 @@
 (module+ test
   (require rackunit)
   
+  ; combine-path
   (check-equal? (combine-path "/foo/bar/" "/baz") (string->path "/baz"))
   (check-equal? (combine-path "/foo/bar/" "baz") (string->path "/foo/bar/baz"))
   (check-equal? (combine-path "/foo/bar" "baz") (string->path "/foo/baz"))
