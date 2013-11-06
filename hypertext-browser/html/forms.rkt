@@ -68,12 +68,17 @@
 (define (form-method form)
   (string->symbol (string-upcase (car/or (xpath form "/form/@method/text()") "POST"))))
 
-(define (form-fields form)
+(define (form-fields form #:submit [submit-name #px"."])
+  (define submit-rx 
+    (if (regexp? submit-name) submit-name 
+        (regexp submit-name)))
+  
   (filter-map 
     (lambda (input)
       (let ([name (input-name input)])
         (if name (cons name (input-value input)) #f)))
-      (xpath form "/form//input")))
+      (append (xpath form "/form//input[@type!='submit' or not(@type)]")
+              (xpath form "/form//input[@type='submit']"))))
 
 (define (input-name input)
   (let ([name\id (xpath input "/input/@name/text() | /input/@id/text()")])
@@ -82,11 +87,14 @@
 (define (input-value input)
   (car/or (xpath input "/input/@value/text()") ""))
 
+(define (input-type input)
+  (car/or (xpath input "/input/@type/text()") ""))
+
 ; TESTS
 
 (module+ test
   (require rackunit)
-(define form "<FORM action=/foo/bar method=put><input id=foo name=baz value='bar'></input><input name=foo value=biz></input></FORM>")
+(define form "<FORM action=/foo/bar method=put><input type=text id=foo name=baz value='bar'></input><input type=submit name=foo value=biz></input></FORM>")
   
 (check-match (form:fill form '(("foo" . "bez"))) 
              '("/foo/bar" PUT ((foo . "bez") (baz . "bar"))))

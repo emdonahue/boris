@@ -58,6 +58,13 @@
   (html:xpath/text html query))
 
 
+(provide (proc-doc/names xpath/node 
+                         (->* (string?) ((or/c string? (listof string?))) (listof string?)) ((query) ((html (browser-body (current-document))))) @{Appends "/node()" to @racket[query], applies it to @racket[html] and returns a list of matches. Unlike @racket[xpath], @racket[xpath/text] will preserve empty nodes as "" rather than skipping them. By default, html is the text of the current page.}))
+
+(define (xpath/node query [html (browser-body (current-document))])
+  (html:xpath/node html query))
+
+
 
 (provide (proc-doc/names xpath/first
                          (->* (string?) ((or/c string? (listof string?)) #:default any/c) (or/c #f string?)) ((query) ((html (browser-body (current-document))) (default #f) )) @{Returns the first result of @racket[xpath] or @racket[default] if @racket[xpath] finds no matches.}))

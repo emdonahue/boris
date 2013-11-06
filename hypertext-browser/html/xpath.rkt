@@ -24,6 +24,12 @@
   @{Returns a list of strings representing the chunks of @racket[html] matching @racket[query] with "/text()" appended. This differs from @racket[xpath] in that @racket[xpath/text] will interpret empty nodes as containing "". @racket[xpath] will skip them.})
  
  (proc-doc/names 
+  xpath/node
+  (-> (or/c string? (listof string?)) string? (listof string?))
+  (html xpath-query)
+  @{Returns a list of strings representing the chunks of @racket[html] matching @racket[query] with "/node()" appended. This differs from @racket[xpath] in that @racket[xpath/node] will interpret empty nodes as containing "". @racket[xpath] will skip them.})
+ 
+ (proc-doc/names 
   xpath/first
   (->* (string? string?) (any/c) any/c)
   ((html xpath-query) ((default #f)))
@@ -53,6 +59,10 @@
 
 (define (xpath/text html query)
   (map (lambda (html) (string-trim (string-join (xpath html "/*/text()") ""))) ; Process each match (to preserve empty strings) 
+       (xpath html query))) ; after querying for the nodes.
+
+(define (xpath/node html query)
+  (map (lambda (html) (string-trim (string-join (xpath html "/*/node()") ""))) ; Process each match (to preserve empty strings) 
        (xpath html query))) ; after querying for the nodes.
 
 (define (xpath/first html query [default #f])
