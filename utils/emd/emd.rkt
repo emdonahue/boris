@@ -15,7 +15,8 @@
   [car/or (-> list? any/c any/c)]
   [value->file (-> path-string? any/c any/c)]
   [combine-path (-> maybe-path? maybe-path? maybe-path?)]
-  [run-time-filename (-> path-string?)])
+  [run-time-filename (-> path-string?)]
+  [truncate (-> list? integer? list?)])
  debug-mode)
 
 ; DEBUGGING
@@ -24,6 +25,12 @@
 
 (define (dbg a b)
   (when (and a (debug-mode)) (display (format "~a: ~a\n" a b))) b)
+
+; LIST
+
+(define (truncate lst [pos 0])  
+  (if (< (length lst) pos)
+      lst (take lst pos)))
 
 ; FILE IO
 
