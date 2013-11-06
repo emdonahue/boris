@@ -29,7 +29,7 @@
         #:submit (or/c string? regexp?)) 
        (listof form/c))
   ((html) ((data '()) (submit #px".")))
-  @{Extracts each form from the @racket[html] string and fills them out with @racket[data] using @racket[form:fill].})
+  @{Extracts each form from the @racket[html] string and fills them out with @racket[data] using @racket[form:fill]. })
  form/c)
 
 ; IMPLEMENTATION
@@ -81,7 +81,7 @@
       (let ([name (input-name input)])
         (if name (cons name (input-value input)) #f)))
       (append (xpath form "/form//input[@type!='submit' or not(@type)]")
-              (truncate (filter (curry regexp-match submit-rx) (xpath form "/form//input[@type='submit']")) 1))))
+              (truncate (filter (compose (curry regexp-match submit-rx) symbol->string input-name) (xpath form "/form//input[@type='submit']")) 1))))
 
 (define (input-name input)
   (let ([name\id (xpath input "/input/@name/text() | /input/@id/text()")])
