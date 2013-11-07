@@ -81,9 +81,9 @@
 
 
 (provide (proc-doc/names forms 
-                         (->* () (dict? (or/c string? (listof string?))) (listof html:form/c)) (() ((data '()) (html (browser-body (current-document))))) @{Scans @racket[html] for any html forms and returns a list of @racket[form/c]s ready to supply to the submit form. Each form's fields will be filled out with any name/value pairs supplied in @racket[data]. If @racket[html] is provided, html will be used instead of the default of the current page text. If @racket[html] is a list, forms will run on each element of the list and all forms found in any element will be returned in a flattened list. This makes @racket[forms] suitable for use with @racket[xpath] to submit only specific forms.}))
-(define (forms [data '()] [html (browser-body (current-document))])
-  (html:forms html data))
+                         (->* () (dict? (or/c string? (listof string?)) #:submit (or/c string? regexp?)) (listof html:form/c)) (() ((data '()) (html (browser-body (current-document))) (submit #px"."))) @{Scans @racket[html] for any html forms and returns a list of @racket[form/c]s ready to supply to the submit form. Each form's fields will be filled out with any name/value pairs supplied in @racket[data]. If @racket[html] is provided, html will be used instead of the default of the current page text. If @racket[html] is a list, forms will run on each element of the list and all forms found in any element will be returned in a flattened list. This makes @racket[forms] suitable for use with @racket[xpath] to submit only specific forms. If @racket[submit] is passed, the form will submit as though the first submit-type input matching @racket[submit] was clicked.}))
+(define (forms [data '()] [html (browser-body (current-document))] #:submit [submit #px"."])
+  (html:forms html data #:submit submit))
 
 
 

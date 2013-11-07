@@ -72,20 +72,18 @@
   (string->symbol (string-upcase (car/or (xpath form "/form/@method/text()") "POST"))))
 
 (define (form-fields form submit)
-  (define submit-rx 
-    (if (regexp? submit) submit
+  (define submit-rx (if (regexp? submit) submit
         (regexp submit)))
   
-  (filter-map 
-    (lambda (input)
-      (let ([name (input-name input)])
-        (if name (cons name (input-value input)) #f)))
-      (append (xpath form "/form//input[@type!='submit' or not(@type)]")
-              (truncate (filter (compose (curry regexp-match submit-rx) symbol->string input-name) (xpath form "/form//input[@type='submit']")) 1))))
+  (filter-map input->name&value
+              (append (xpath form "/form//input[(@name or @id) and (@type!='submit' or not(@type))]")
+                      (truncate (filter (compose (curry regexp-match submit-rx) input-name) (xpath form "/form//input[@type='submit' and (@name or @id)]")) 1))))
+
+(define (input->name&value input)
+  (cons (string->symbol (input-name input)) (input-value input)))
 
 (define (input-name input)
-  (let ([name\id (xpath input "/input/@name/text() | /input/@id/text()")])
-    (if (empty? name\id) #f (string->symbol (car name\id)))))
+  (xpath/first input "/input/@name/text() | /input/@id/text()"))
 
 (define (input-value input)
   (car/or (xpath input "/input/@value/text()") ""))
@@ -100,6 +98,8 @@
 (define form "<FORM action=/foo/bar method=put><input type=text id=foo name=baz value='bar'></input><input type=submit name=foo value=biz><input value=hug></input></input></FORM>")
   
   (define form/2submit "<FORM action=/foo/bar method=put><input type=text id=foo name=baz value='bar'></input><input type=submit name=foo value=biz></input><input type=submit name=fuzz value=buzz></input></FORM>")
+  
+  (define form/submit/noname "<FORM action=/foo/bar method=put><input type=text id=foo name=baz value='bar'><input type=submit></input></input></FORM>")
   
 (check-match (form:fill form '(("foo" . "bez"))) 
              '("/foo/bar" PUT ((foo . "bez") (baz . "bar"))))
@@ -120,5 +120,8 @@
   (check-equal? (forms form/2submit #:submit "fuzz")
                 '(("/foo/bar"
                    PUT ((baz . "bar") (fuzz . "buzz")))))
+  
+  (check-equal? (forms form/submit/noname)
+                '(("/foo/bar" PUT ((baz . "bar")))))
   )
 
