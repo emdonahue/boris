@@ -71,25 +71,6 @@
   (path)
   @{Converts a file @racket[path] to a file:// @racket[uri?].}))
 
-;(provide 
-; (proc-doc/names
-;  url->string/raw 
-;  (-> url? string?)
-;  (url)
-;  @{Inverse of @racket[string->url]. Does not encode query parameters.})
-; 
-; (proc-doc/names
-;  url->path&query&fragment 
-;  (-> url? string?)
-;  (url)
-;  @{Reurns the raw string from @racket[url-path] to @racket[url-fragment].})
-; 
-;  (proc-doc/names
-;   url-path/string 
-;   (-> url? string?)
-;   (url)
-;   @{Returns the raw @racket[url-path] as a string.}))
-
 ; IMPLEMENTATION
 
  (require racket/serialize
@@ -103,7 +84,15 @@
 
 ; DATATYPES ==============================
 
-(serializable-struct uri (scheme userinfo host port path query fragment) #:transparent)
+(define (pretty-print-uri u port mode)
+  (match mode
+    [#f (display (uri->string u) port)]
+    [else (print (string-append "#<uri:" (uri->string u) ">") port)]))
+
+(serializable-struct uri (scheme userinfo host port path query fragment) #:transparent
+                     #:methods gen:custom-write
+                     [(define write-proc pretty-print-uri)])
+
 
 ; PARAMETERS ================================
 
@@ -266,12 +255,10 @@
   (check-equal? (uri->string (combine-uri (string->uri u) (string->uri "foo/bar"))) "http://user:pass@foo.com:8080/foo/bar")
   
   
-;  (check-equal? (url-path/string (string->url "http://foo.com")) "/")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?#fo")) "/bar?baz=f i?#fo")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar?baz=f i?")) "/bar?baz=f i?")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com")) "/")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/")) "/")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar/")) "/bar/")
-;  (check-equal? (url->path&query&fragment (string->url "http://foo.com/bar")) "/bar"))
+  ; Pretty printing\
+  (let-values ([(in out) (make-pipe)]
+               [(u) (string->uri "http://foo.com")])
+    (write u out)
+    (check-equal? (read in) "#<uri:http://foo.com>"))
   
 )

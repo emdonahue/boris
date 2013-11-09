@@ -21,7 +21,7 @@
 
 ; DEBUGGING
 
-(define debug-mode (make-parameter #f))
+(define debug-mode (make-parameter #t))
 
 (define (dbg a b)
   (when (and a (debug-mode)) (display (format "~a: ~a\n" a b))) b)

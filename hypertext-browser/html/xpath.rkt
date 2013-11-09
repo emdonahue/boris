@@ -31,7 +31,7 @@
  
  (proc-doc/names 
   xpath/first
-  (->* (string? string?) (any/c) any/c)
+  (->* ((or/c string? (listof string?)) string?) (any/c) any/c)
   ((html xpath-query) ((default #f)))
   @{Returns @racket[(first (xpath query html))] or @racket[default] if there are no matches.})
  
