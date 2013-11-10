@@ -32,6 +32,11 @@
   (if (< (length lst) pos)
       lst (take lst pos)))
 
+; DICT
+
+(define (dict-invert d)
+  (dict-map d (lambda (a b) (cons b a))))
+
 ; FILE IO
 
 (define (value->file file value)
@@ -129,4 +134,8 @@
   (check-equal? (string- "foobar" "bar") "foo")
   (check-equal? (string- "foobar" "baz") "foobar")
   (check-equal? (string- "foobarbaz" "baz") "foobar")
-  (check-equal? (string-last "bar") #\r))
+  (check-equal? (string-last "bar") #\r)
+  
+  ; DICT
+  (check-equal? (dict-invert '((1 . 2) (3 . 4)))
+                '((2 . 1) (4 . 3))))
