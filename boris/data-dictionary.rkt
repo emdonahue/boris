@@ -17,10 +17,10 @@
 
 
 (module+ test
-  (define dd 
-    (make-data-dictionary
-     1 first 3 4 second 6))
-  (dd (list 7 8 9))
+  (require rackunit)
+  (check-equal? ((make-data-dictionary
+     1 first 3 4 second 6) (list 7 8 9))
+                '((1 7 3) (4 8 6)))
   )
 
              
