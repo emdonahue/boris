@@ -1,6 +1,8 @@
-#lang racket
+#lang racket/base
 
-(require "../utils/emd/emd.rkt")
+(require racket/list
+         racket/match
+         "../utils/emd/emd.rkt")
 
 (define make-data-dictionary 
   (lambda args
@@ -8,9 +10,11 @@
     (lambda (data)
       (for/list ([column table])
         (list (first column)
-              (or (for/first ([example (map (second column) data)] 
-                         #:when (not-empty example)) example) "N/A")
+              (or (for/first ([datum data]
+                              #:when (not-empty ((second column) datum)))
+                    ((second column) datum)) "N/A")
               (third column))))))
+
 
 (define/match (not-empty datum)
   [('()) #f]
@@ -21,14 +25,17 @@
 
 (module+ test
   (require rackunit)
-  ;(check-equal? 
+  (check-equal? 
    ((make-data-dictionary
      1 first "first" 
      2 second "second" 
      3 third "third"
      4 fourth "fourth") 
     '(("  " () 9 "") (10 11 12 "")))
-   ;'((1 7 3) (4 8 6)))
+   '((1 10 "first")
+     (2 11 "second")
+     (3 9 "third")
+     (4 "N/A" "fourth")))
   )
 
              
