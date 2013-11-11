@@ -32,6 +32,17 @@
   (if (< (length lst) pos)
       lst (take lst pos)))
 
+
+(define (chunk lst size)
+  (reverse
+   (map reverse
+        (foldl (lambda (index element result)
+                 (if (and (= (modulo index size) 0)
+                          (< 0 index))
+                     (cons (list element) result)
+                     (cons (cons element (first result)) (list-tail result 1))))
+               '(()) (range 0 (length lst)) lst))))
+
 ; DICT
 
 (define (dict-invert d)
@@ -138,4 +149,10 @@
   
   ; DICT
   (check-equal? (dict-invert '((1 . 2) (3 . 4)))
-                '((2 . 1) (4 . 3))))
+                '((2 . 1) (4 . 3)))
+  
+  ; LIST
+  
+  (check-equal? (chunk '(1 2 3 4 5 6 7 8 9 10) 2)
+  '((1 2) (3 4) (5 6) (7 8) (9 10)))
+  )
