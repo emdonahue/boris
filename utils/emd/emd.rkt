@@ -12,7 +12,7 @@
   [string- (-> string? string? string?)]
   [->symbol (-> (or/c string? symbol?) symbol?)]
   [->list (-> any/c list?)]
-  [car/or (-> list? any/c any/c)]
+  [car/or (->* (list?) (any/c) any/c)]
   [value->file (-> path-string? any/c any/c)]
   [combine-path (-> maybe-path? maybe-path? maybe-path?)]
   [run-time-filename (-> path-string?)]
