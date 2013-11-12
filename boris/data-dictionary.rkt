@@ -1,5 +1,9 @@
 #lang racket/base
 
+; Provides utilities to construct data dictionaries from collected data.
+
+(provide make-data-dictionary)
+
 (require racket/list
          racket/match
          "../utils/emd/emd.rkt")
