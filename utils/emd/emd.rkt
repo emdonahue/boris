@@ -17,7 +17,8 @@
   [combine-path (-> maybe-path? maybe-path? maybe-path?)]
   [run-time-filename (-> path-string?)]
   [truncate (-> list? integer? list?)]
-  [chunk (-> list? positive? list?)])
+  [chunk (-> list? positive? list?)]
+  [string->file (-> string? path-string? void?)])
  debug-mode)
 
 ; DEBUGGING
@@ -55,6 +56,11 @@
   (with-output-to-file file 
     (lambda () (write value))
   #:exists 'replace))
+
+(define (string->file str path)
+  (with-output-to-file path
+    (lambda () (display str))
+    #:exists 'replace))
 
 (define (run-time-filename)
   (let-values ([(dir filename dir?) (split-path (find-system-path 'run-file))])
