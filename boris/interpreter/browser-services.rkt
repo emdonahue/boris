@@ -24,9 +24,9 @@
          racket/list
          racket/match
          "services.rkt"
-         "../semantics/state.rkt"
-         "../../hypertext-browser/main.rkt"
-         "../../hypertext-browser/uri.rkt"
+         boris/semantics/state
+         hypertext-browser/main
+         hypertext-browser/uri
          "../../utils/emd/emd.rkt")
 
 ; A basic services object that implements browser navigation, caching, and extracts to a generator.
