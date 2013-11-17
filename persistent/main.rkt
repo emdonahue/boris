@@ -38,7 +38,10 @@
   #:methods gen:dict
   [(define (dict-ref store key [failure-result #f])   
      (if (hash-ref (fs-dict-key->tmp-path store) key #f)
-         (deserialize (file->value (hash-ref (fs-dict-key->tmp-path store) key #f)))
+         (deserialize (file->value 
+                       (build-path 
+                        (fs-dict-path store) 
+                        (hash-ref (fs-dict-key->tmp-path store) key #f))))
          failure-result))
    ; TODO decide whether ref needs to match the normal dict error-throwing semantics.
    
@@ -47,8 +50,9 @@
                       (fs-dict-key->tmp-path cache) 
                       key 
                       (cache->tmpfile cache))])
+       
        ; Write the value to disk,
-       (write-to-file (serialize v) tmp-path #:exists 'replace)
+       (write-to-file (serialize v) (build-path (fs-dict-path cache) tmp-path) #:exists 'replace)
        ; store its key in the index hash, and
        (hash-set! (fs-dict-key->tmp-path cache) key tmp-path)
        ; write the index hash to disk.
@@ -70,7 +74,9 @@
 
 ; Generates a temp file path name for cache.
 (define (cache->tmpfile cache) 
-  (make-temporary-file (path->string (build-path (fs-dict-path cache) "~a"))))
+  (define-values (dir path dir?) 
+    (split-path 
+     (make-temporary-file (path->string (build-path (fs-dict-path cache) "~a"))))) path)
 
 ; Generates the index file name for cache.
 (define (cache->index cache)
